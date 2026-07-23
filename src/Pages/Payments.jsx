@@ -5,7 +5,7 @@ import { useToast } from "../Context/ToastContext";
 import { useAuth } from "../Context/AuthContext";
 import { supabase } from "../supabase/supabaseClient";
 import Modal from "../Components/UI/Modal";
-import ConfirmDialog from "../Components/UI/ConfirmDialog";
+import ConfirmDialog from "../Components/UI/ConfimDialog";
 import StatusBadge from "../Components/UI/StatusBadge";
 import Loader from "../Components/UI/Loader";
 import EmptyState from "../Components/UI/EmptyState";
@@ -29,9 +29,18 @@ function Payments() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+
   useEffect(() => {
     const loadOrders = async () => {
-      const { data } = await supabase.from("orders").select("id, amount, customers(name)").order("created_at", { ascending: false }).limit(100);
+      const { data, error: ordersError } = await supabase
+        .from("orders")
+        .select("id, amount, customer_id, customers(name)")
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+      if (ordersError) {
+        console.error("Failed to load orders for payment form:", ordersError.message);
+      }
       setOrders(data || []);
     };
     loadOrders();
