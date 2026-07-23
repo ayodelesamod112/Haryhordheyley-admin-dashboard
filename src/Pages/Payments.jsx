@@ -5,7 +5,7 @@ import { useToast } from "../Context/ToastContext";
 import { useAuth } from "../Context/AuthContext";
 import { supabase } from "../supabase/supabaseClient";
 import Modal from "../Components/UI/Modal";
-import ConfirmDialog from "../Components/UI/ConfimDialog";
+import ConfirmDialog from "../Components/UI/ConfirmDialog";
 import StatusBadge from "../Components/UI/StatusBadge";
 import Loader from "../Components/UI/Loader";
 import EmptyState from "../Components/UI/EmptyState";
@@ -28,7 +28,6 @@ function Payments() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
 
   useEffect(() => {
     const loadOrders = async () => {
