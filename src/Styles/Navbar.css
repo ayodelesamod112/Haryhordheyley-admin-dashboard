@@ -1,0 +1,231 @@
+.custom-navbar {
+  height: var(--navbar-height);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.navbar-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink);
+  padding: 6px;
+}
+
+.search-container {
+  position: relative;
+  flex: 1;
+  max-width: 420px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-muted);
+}
+
+.search-input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 13px;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.icon-btn {
+  position: relative;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-ink);
+  transition: background var(--transition);
+}
+
+.icon-btn:hover {
+  background: var(--color-neutral-bg);
+}
+
+.notif-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--color-yellow);
+  color: var(--color-black);
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-wrap {
+  position: relative;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: 220px;
+  z-index: 60;
+  overflow: hidden;
+}
+
+.dropdown-heading {
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dropdown-empty {
+  padding: 18px 16px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.notif-panel {
+  width: 300px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notif-item.unread {
+  background: rgba(255, 199, 44, 0.08);
+}
+
+.notif-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.notif-message {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.dropdown-view-all {
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-yellow-deep);
+  cursor: pointer;
+}
+
+.dropdown-view-all:hover {
+  background: var(--color-surface);
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 5px 12px 5px 5px;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.profile-trigger:hover {
+  background: var(--color-neutral-bg);
+}
+
+.navbar-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+
+.navbar-user-info {
+  text-align: left;
+}
+
+.navbar-user-info .user-name {
+  color: var(--color-ink);
+  font-size: 13px;
+}
+
+.navbar-user-info .user-role {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.profile-panel {
+  min-width: 180px;
+}
+
+.profile-panel button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.profile-panel button:hover {
+  background: var(--color-surface);
+}
+
+.profile-panel button.danger {
+  color: var(--color-danger);
+}
+
+@media (max-width: 900px) {
+  .navbar-menu-btn { display: flex; }
+  .navbar-user-info { display: none; }
+}
+
+@media (max-width: 560px) {
+  .search-container { max-width: none; }
+}
