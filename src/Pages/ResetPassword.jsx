@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 import "../Styles/Login.css";
 
 function ResetPassword() {
@@ -41,7 +41,7 @@ function ResetPassword() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <img src={logo} alt="HARYHORDHEYLEY" className="auth-logo" />
+        <img src={Avatar} alt="HARYHORDHEYLEY" className="auth-logo" />
         {done ? (
           <div>
             <span className="eyebrow">Success</span>

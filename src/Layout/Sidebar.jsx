@@ -1,7 +1,7 @@
 
 
 
-
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LuLayoutDashboard,
@@ -17,8 +17,9 @@ import {
   LuX,
 } from "react-icons/lu";
 import { FiBarChart2 } from "react-icons/fi";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 import { useAuth } from "../Context/AuthContext";
+import ConfirmDialog from "../Components/UI/ConfirmDialog";
 import "../Styles/Sidebar.css";
 
 const NAV_ITEMS = [
@@ -36,8 +37,17 @@ const NAV_ITEMS = [
 
 function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
   const { profile, user, signOut } = useAuth();
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const displayName = profile?.full_name || user?.email || "Admin";
+
+  const handleConfirmLogout = async () => {
+    setLoggingOut(true);
+    await signOut();
+    setLoggingOut(false);
+    setConfirmingLogout(false);
+  };
 
   return (
     <>
@@ -45,7 +55,7 @@ function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
       <aside className={`sidebar ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <img src={logo} alt="HARYHORDHEYLEY" className="sidebar-logo" />
+            <img src={Avatar} alt="HARYHORDHEYLEY" className="sidebar-logo" />
             {!collapsed && <span className="sidebar-brand-text">HARYHORDHEYLEY</span>}
           </div>
           <button type="button" className="sidebar-close-mobile" onClick={onCloseMobile} aria-label="Close menu">
@@ -80,12 +90,29 @@ function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
               </div>
             )}
           </div>
-          <button type="button" className="logout-btn" onClick={signOut} title="Logout">
+          <button
+            type="button"
+            className="logout-btn"
+            onClick={() => setConfirmingLogout(true)}
+            title="Logout"
+          >
             <LuLogOut size={16} />
             {!collapsed && <span>Logout</span>}
           </button>
         </div>
       </aside>
+
+      {confirmingLogout && (
+        <ConfirmDialog
+          title="Log out?"
+          message="Are you sure you want to log out of your account?"
+          confirmLabel="Log out"
+          danger={true}
+          onConfirm={handleConfirmLogout}
+          onCancel={() => setConfirmingLogout(false)}
+          loading={loggingOut}
+        />
+      )}
     </>
   );
 }

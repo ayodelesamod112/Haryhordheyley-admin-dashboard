@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import { useAuth } from "../Context/AuthContext";
 import AuthSidePanel from "../Components/AuthSidePanel";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -70,7 +70,7 @@ function Signup() {
         <AuthSidePanel />
 
         <div className="auth-form-panel">
-          <img src={logo} alt="HARYHORDHEYLEY" className="auth-logo" />
+          <img src={Avatar} alt="HARYHORDHEYLEY" className="auth-logo" />
           <form onSubmit={handleSubmit}>
             <span className="eyebrow">Create admin account</span>
             <h2>Get started</h2>
