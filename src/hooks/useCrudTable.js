@@ -76,7 +76,7 @@ export function useCrudTable(table, { searchColumns = [], selectQuery = "*" } = 
       .update(payload)
       .eq("id", id)
       .select()
-      .single();
+      
     if (!updateError) await fetchRows();
     return { data, error: updateError };
   };

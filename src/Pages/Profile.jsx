@@ -12,6 +12,8 @@ function Profile() {
   const [form, setForm] = useState({
     full_name: profile?.full_name || "",
     phone: profile?.phone || "",
+    address: profile?.address || "",
+    bio: profile?.bio || "",
   });
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -27,7 +29,7 @@ function Profile() {
     setSavingProfile(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: form.full_name, phone: form.phone })
+      .update({ full_name: form.full_name, phone: form.phone, address: form.address, bio: form.bio })
       .eq("id", user.id);
     setSavingProfile(false);
 
@@ -141,6 +143,14 @@ function Profile() {
                 <div className="form-field">
                   <label>Email</label>
                   <input type="email" value={user?.email || ""} disabled />
+                </div>
+                <div className="form-field">
+                  <label>Address</label>
+                  <input type="text" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+                </div>
+                <div className="form-field full">
+                  <label>Bio</label>
+                  <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="A little about you (optional)" />
                 </div>
               </div>
               <div className="form-actions">

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { LuSearch, LuPlus, LuPencil, LuTrash2 } from "react-icons/lu";
+import { LuSearch, LuPlus, LuPencil, LuTrash2, LuImage, LuUpload } from "react-icons/lu";
 import { useCrudTable } from "../hooks/useCrudTable";
 import { useSearch } from "../Context/SearchContext";
 import { useToast } from "../Context/ToastContext";
 import { useAuth } from "../Context/AuthContext";
+import { supabase } from "../supabase/supabaseClient";
 import Modal from "../Components/UI/Modal";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
 import StatusBadge from "../Components/UI/StatusBadge";
@@ -11,7 +12,7 @@ import Loader from "../Components/UI/Loader";
 import EmptyState from "../Components/UI/EmptyState";
 import Pagination from "../Components/UI/Pagination";
 
-const EMPTY_FORM = { name: "", description: "", category: "", price: "", status: "active" };
+const EMPTY_FORM = { name: "", description: "", category: "", price: "", status: "active", image_url: "" };
 
 function Services() {
   const { query } = useSearch();
@@ -27,6 +28,7 @@ function Services() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -43,9 +45,31 @@ function Services() {
 
   const openEdit = (row) => {
     setEditingId(row.id);
-    setForm({ name: row.name || "", description: row.description || "", category: row.category || "", price: row.price ?? "", status: row.status || "active" });
+    setForm({
+      name: row.name || "", description: row.description || "", category: row.category || "",
+      price: row.price ?? "", status: row.status || "active", image_url: row.image_url || "",
+    });
     setFormError("");
     setModalOpen(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const filePath = `${user.id}/${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabase.storage.from("service-images").upload(filePath, file);
+
+    if (uploadError) {
+      setUploadingImage(false);
+      setFormError(uploadError.message);
+      return;
+    }
+
+    const { data } = supabase.storage.from("service-images").getPublicUrl(filePath);
+    setForm((prev) => ({ ...prev, image_url: data.publicUrl }));
+    setUploadingImage(false);
   };
 
   const handleSubmit = async (e) => {
@@ -91,7 +115,7 @@ function Services() {
         <div>
           <span className="eyebrow">Services</span>
           <h1>Service Catalog</h1>
-          <p className="page-subtitle">Everything HARYHORDHEYLEY offers, priced and organized.</p>
+          <p className="page-subtitle">Everything HARYHORDHEYLEY offers, priced and organized. Add a photo or flyer to make it shine on the customer site.</p>
         </div>
         <button type="button" className="btn btn-primary" onClick={openCreate}>
           <LuPlus size={16} /> Add Service
@@ -123,6 +147,7 @@ function Services() {
               <table className="data-table">
                 <thead>
                   <tr>
+                    <th></th>
                     <th>Service</th>
                     <th>Category</th>
                     <th>Price</th>
@@ -133,6 +158,15 @@ function Services() {
                 <tbody>
                   {rows.map((s) => (
                     <tr key={s.id}>
+                      <td>
+                        {s.image_url ? (
+                          <img src={s.image_url} alt={s.name} style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }} />
+                        ) : (
+                          <div style={{ width: 44, height: 44, borderRadius: 8, background: "var(--color-neutral-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <LuImage size={16} style={{ color: "var(--color-muted)" }} />
+                          </div>
+                        )}
+                      </td>
                       <td>
                         <div className="cell-primary">{s.name}</div>
                         {s.description && <div className="cell-muted" style={{ fontSize: 12, marginTop: 2 }}>{s.description}</div>}
@@ -169,6 +203,22 @@ function Services() {
                 <label>Description</label>
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
+              <div className="form-field full">
+                <label>Photo / Flyer</label>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  {form.image_url ? (
+                    <img src={form.image_url} alt="Preview" style={{ width: 70, height: 70, borderRadius: 10, objectFit: "cover", border: "1px solid var(--color-border)" }} />
+                  ) : (
+                    <div style={{ width: 70, height: 70, borderRadius: 10, background: "var(--color-neutral-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <LuImage size={22} style={{ color: "var(--color-muted)" }} />
+                    </div>
+                  )}
+                  <label className="btn btn-ghost btn-sm" style={{ cursor: "pointer" }}>
+                    <LuUpload size={14} /> {uploadingImage ? "Uploading…" : "Upload image"}
+                    <input type="file" accept="image/*" hidden onChange={handleImageUpload} disabled={uploadingImage} />
+                  </label>
+                </div>
+              </div>
               <div className="form-field">
                 <label>Category</label>
                 <input type="text" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
@@ -187,7 +237,7 @@ function Services() {
             </div>
             <div className="form-actions">
               <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save Service"}</button>
+              <button type="submit" className="btn btn-primary" disabled={saving || uploadingImage}>{saving ? "Saving…" : "Save Service"}</button>
             </div>
           </form>
         </Modal>

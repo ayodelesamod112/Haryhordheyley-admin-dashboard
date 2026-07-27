@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 import "../Styles/Login.css";
 
 function ForgotPassword() {
@@ -27,7 +27,7 @@ function ForgotPassword() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <img src={logo} alt="HARYHORDHEYLEY" className="auth-logo" />
+        <img src={Avatar} alt="HARYHORDHEYLEY" className="auth-logo" />
         {sent ? (
           <div>
             <span className="eyebrow">Check your inbox</span>

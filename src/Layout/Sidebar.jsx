@@ -1,6 +1,3 @@
-
-
-
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -11,13 +8,14 @@ import {
   LuCreditCard,
   LuUserCog,
   LuBell,
+  LuMessageSquare,
   LuSettings,
   LuUserRound,
   LuLogOut,
   LuX,
 } from "react-icons/lu";
 import { FiBarChart2 } from "react-icons/fi";
-import Avatar from "../assets/Avatar.png";
+import logo from "../assets/logo.png";
 import { useAuth } from "../Context/AuthContext";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
 import "../Styles/Sidebar.css";
@@ -31,6 +29,7 @@ const NAV_ITEMS = [
   { to: "/users", label: "Users", icon: LuUserCog },
   { to: "/reports", label: "Reports", icon: FiBarChart2 },
   { to: "/notifications", label: "Notifications", icon: LuBell },
+  { to: "/messages", label: "Messages", icon: LuMessageSquare },
   { to: "/settings", label: "Settings", icon: LuSettings },
   { to: "/profile", label: "Profile", icon: LuUserRound },
 ];
@@ -55,7 +54,7 @@ function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
       <aside className={`sidebar ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <img src={Avatar} alt="HARYHORDHEYLEY" className="sidebar-logo" />
+            <img src={logo} alt="HARYHORDHEYLEY" className="sidebar-logo" />
             {!collapsed && <span className="sidebar-brand-text">HARYHORDHEYLEY</span>}
           </div>
           <button type="button" className="sidebar-close-mobile" onClick={onCloseMobile} aria-label="Close menu">
