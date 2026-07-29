@@ -6,7 +6,7 @@ import { supabase } from "../supabase/supabaseClient";
 import "../Styles/Profile.css";
 
 function Profile() {
-  const { user, profile, refreshProfile, updatePassword } = useAuth();
+  const { user, profile, refreshProfile, updatePassword, updateEmail } = useAuth();
   const { showToast } = useToast();
 
   const [form, setForm] = useState({
@@ -17,6 +17,11 @@ function Profile() {
   });
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const [emailForm, setEmailForm] = useState({ newEmail: "" });
+  const [emailError, setEmailError] = useState("");
+  const [emailInfo, setEmailInfo] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({ password: "", confirmPassword: "" });
   const [passwordError, setPasswordError] = useState("");
@@ -71,6 +76,29 @@ function Profile() {
     showToast("Profile picture updated");
   };
 
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    setEmailError("");
+    setEmailInfo("");
+
+    if (!emailForm.newEmail.trim()) {
+      setEmailError("Enter the new email address.");
+      return;
+    }
+
+    setSavingEmail(true);
+    const { error } = await updateEmail(emailForm.newEmail.trim());
+    setSavingEmail(false);
+
+    if (error) {
+      setEmailError(error.message);
+      return;
+    }
+
+    setEmailInfo("Check both your old and new email inboxes — Supabase sends a confirmation link to finish the change.");
+    setEmailForm({ newEmail: "" });
+  };
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setPasswordError("");
@@ -102,7 +130,7 @@ function Profile() {
         <div>
           <span className="eyebrow">Account</span>
           <h1>Profile</h1>
-          <p className="page-subtitle">Manage your personal admin account details.</p>
+          <p className="page-subtitle">Manage your personal account details.</p>
         </div>
       </div>
 
@@ -141,10 +169,6 @@ function Profile() {
                   <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                 </div>
                 <div className="form-field">
-                  <label>Email</label>
-                  <input type="email" value={user?.email || ""} disabled />
-                </div>
-                <div className="form-field">
                   <label>Address</label>
                   <input type="text" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
                 </div>
@@ -155,6 +179,27 @@ function Profile() {
               </div>
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={savingProfile}>{savingProfile ? "Saving…" : "Save Changes"}</button>
+              </div>
+            </form>
+          </div>
+
+          <div className="card">
+            <div className="card-header"><h2>Change email</h2></div>
+            <form className="card-body" onSubmit={handleEmailSubmit}>
+              {emailError && <div className="form-error-banner">{emailError}</div>}
+              {emailInfo && <div className="form-success-banner">{emailInfo}</div>}
+              <div className="form-grid">
+                <div className="form-field">
+                  <label>Current email</label>
+                  <input type="email" value={user?.email || ""} disabled />
+                </div>
+                <div className="form-field">
+                  <label>New email</label>
+                  <input type="email" value={emailForm.newEmail} onChange={(e) => setEmailForm({ newEmail: e.target.value })} placeholder="new@example.com" required />
+                </div>
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={savingEmail}>{savingEmail ? "Updating…" : "Update Email"}</button>
               </div>
             </form>
           </div>

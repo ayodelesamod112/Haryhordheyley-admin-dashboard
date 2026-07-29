@@ -9,8 +9,7 @@ function Settings() {
   const { showToast } = useToast();
   const { theme, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(true);
-  const [businessName, setBusinessName] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
+  const [form, setForm] = useState({ businessName: "", logoUrl: "", phone: "", email: "", address: "" });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -19,8 +18,13 @@ function Settings() {
       setLoading(true);
       const { data } = await supabase.from("business_settings").select("*").eq("id", 1).single();
       if (data) {
-        setBusinessName(data.business_name || "");
-        setLogoUrl(data.logo_url || "");
+        setForm({
+          businessName: data.business_name || "",
+          logoUrl: data.logo_url || "",
+          phone: data.phone || "",
+          email: data.email || "",
+          address: data.address || "",
+        });
       }
       setLoading(false);
     };
@@ -32,7 +36,13 @@ function Settings() {
     setSaving(true);
     const { error } = await supabase
       .from("business_settings")
-      .update({ business_name: businessName, logo_url: logoUrl })
+      .update({
+        business_name: form.businessName,
+        logo_url: form.logoUrl,
+        phone: form.phone,
+        email: form.email,
+        address: form.address,
+      })
       .eq("id", 1);
     setSaving(false);
 
@@ -58,7 +68,7 @@ function Settings() {
     }
 
     const { data } = supabase.storage.from("business-assets").getPublicUrl(filePath);
-    setLogoUrl(data.publicUrl);
+    setForm((prev) => ({ ...prev, logoUrl: data.publicUrl }));
     setUploading(false);
     showToast("Logo uploaded — remember to Save Changes");
   };
@@ -77,7 +87,7 @@ function Settings() {
         <div>
           <span className="eyebrow">Configuration</span>
           <h1>Settings</h1>
-          <p className="page-subtitle">Business identity and dashboard preferences.</p>
+          <p className="page-subtitle">Business identity, contact info, and dashboard preferences.</p>
         </div>
       </div>
 
@@ -88,13 +98,13 @@ function Settings() {
             <div className="form-grid">
               <div className="form-field full">
                 <label>Business name</label>
-                <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} required />
+                <input type="text" value={form.businessName} onChange={(e) => setForm({ ...form, businessName: e.target.value })} required />
               </div>
               <div className="form-field full">
                 <label>Business logo</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Business logo" style={{ width: 56, height: 56, borderRadius: 10, objectFit: "cover", border: "1px solid var(--color-border)" }} />
+                  {form.logoUrl ? (
+                    <img src={form.logoUrl} alt="Business logo" style={{ width: 56, height: 56, borderRadius: 10, objectFit: "cover", border: "1px solid var(--color-border)" }} />
                   ) : (
                     <div style={{ width: 56, height: 56, borderRadius: 10, background: "var(--color-neutral-bg)" }} />
                   )}
@@ -104,7 +114,20 @@ function Settings() {
                   </label>
                 </div>
               </div>
+              <div className="form-field">
+                <label>Phone number</label>
+                <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="e.g. 0801 234 5678" />
+              </div>
+              <div className="form-field">
+                <label>Email address</label>
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@example.com" />
+              </div>
+              <div className="form-field full">
+                <label>Business address</label>
+                <input type="text" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Where customers can find you" />
+              </div>
             </div>
+            <p style={{ fontSize: 12, marginTop: 6 }}>These show up on your customer-facing About Us / Contact Us pages.</p>
             <div className="form-actions">
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save Changes"}</button>
             </div>
