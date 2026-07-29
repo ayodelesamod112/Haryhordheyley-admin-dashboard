@@ -15,7 +15,7 @@ import {
   LuX,
 } from "react-icons/lu";
 import { FiBarChart2 } from "react-icons/fi";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 import { useAuth } from "../Context/AuthContext";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
 import "../Styles/Sidebar.css";
