@@ -54,7 +54,7 @@ function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
       <aside className={`sidebar ${collapsed ? "is-collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <img src={logo} alt="HARYHORDHEYLEY" className="sidebar-logo" />
+            <img src={Avatar} alt="HARYHORDHEYLEY" className="sidebar-logo" />
             {!collapsed && <span className="sidebar-brand-text">HARYHORDHEYLEY</span>}
           </div>
           <button type="button" className="sidebar-close-mobile" onClick={onCloseMobile} aria-label="Close menu">
