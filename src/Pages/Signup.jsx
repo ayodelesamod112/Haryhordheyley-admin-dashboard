@@ -231,7 +231,7 @@ function Signup() {
         <div className="auth-form-panel">
           <img src={Avatar} alt="HARYHORDHEYLEY" className="auth-logo" />
           <form onSubmit={handleSubmit}>
-            <span className="eyebrow">Create admin account</span>
+            <span className="eyebrow">Create an Account</span>
             <h2>Get started</h2>
             <p className="auth-subtitle">Set up access to the HARYHORDHEYLEY admin dashboard.</p>
 
