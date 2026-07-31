@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuPhone, LuMail, LuMapPin, LuClock, LuMessageCircle } from "react-icons/lu";
 import { supabase } from "../../supabase/supabaseClient";
 import { useAuth } from "../../Context/AuthContext";
@@ -10,6 +10,11 @@ function ContactUs() {
   const { showToast } = useToast();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [business, setBusiness] = useState(null);
+
+  useEffect(() => {
+    supabase.from("business_settings").select("*").eq("id", 1).single().then(({ data }) => setBusiness(data));
+  }, []);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -41,10 +46,34 @@ function ContactUs() {
       <div className="contact-grid">
         <div className="portal-card">
           <h3>Contact Details</h3>
-          <div className="contact-info-item"><LuPhone size={18} /><div><h4>Phone / WhatsApp</h4><p>Message us and we'll share our number</p></div></div>
-          <div className="contact-info-item"><LuMail size={18} /><div><h4>Email</h4><p>Reach out via the form and we'll reply directly</p></div></div>
-          <div className="contact-info-item"><LuMapPin size={18} /><div><h4>Location</h4><p>Serving customers wherever you are</p></div></div>
-          <div className="contact-info-item"><LuClock size={18} /><div><h4>Working Hours</h4><p>Mon – Sat, 9am – 6pm</p></div></div>
+          <div className="contact-info-item">
+            <LuPhone size={18} />
+            <div>
+              <h4>Phone / WhatsApp</h4>
+              <p>{business?.phone || "Message us and we'll share our number"}</p>
+            </div>
+          </div>
+          <div className="contact-info-item">
+            <LuMail size={18} />
+            <div>
+              <h4>Email</h4>
+              <p>{business?.email || "Reach out via the form and we'll reply directly"}</p>
+            </div>
+          </div>
+          <div className="contact-info-item">
+            <LuMapPin size={18} />
+            <div>
+              <h4>Location</h4>
+              <p>{business?.address || "Serving customers wherever you are"}</p>
+            </div>
+          </div>
+          <div className="contact-info-item">
+            <LuClock size={18} />
+            <div>
+              <h4>Working Hours</h4>
+              <p>Mon – Sat, 9am – 6pm</p>
+            </div>
+          </div>
         </div>
 
         <div className="portal-card">
