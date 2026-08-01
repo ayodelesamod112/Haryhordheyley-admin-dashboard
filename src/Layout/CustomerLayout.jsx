@@ -9,7 +9,7 @@ import { useAuth } from "../Context/AuthContext";
 import { useCustomerTheme } from "../Context/CustomerThemeContext";
 import { supabase } from "../supabase/supabaseClient";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 import "../Styles/CustomerPortal.css";
 
 const NAV_ITEMS = [
@@ -87,7 +87,7 @@ function CustomerLayout() {
       <aside className={`portal-sidebar ${mobileOpen ? "is-mobile-open" : ""}`}>
         <div className="portal-sidebar-top">
           <div className="portal-brand">
-            <img src={logo} alt="HARYHORDHEYLEY" className="portal-logo" />
+            <img src={Avatar} alt="HARYHORDHEYLEY" className="portal-logo" />
             <span>HARYHORDHEYLEY</span>
           </div>
           <button type="button" className="portal-close-mobile" onClick={() => setMobileOpen(false)} aria-label="Close menu">
