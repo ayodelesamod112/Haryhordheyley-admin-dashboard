@@ -81,7 +81,11 @@ function Sidebar({ collapsed, mobileOpen, onCloseMobile }) {
 
         <div className="sidebar-bottom">
           <div className="profile-card">
-            <div className="avatar-fallback">{displayName.charAt(0).toUpperCase()}</div>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt={displayName} className="sidebar-avatar-img" />
+            ) : (
+              <div className="avatar-fallback">{displayName.charAt(0).toUpperCase()}</div>
+            )}
             {!collapsed && (
               <div className="user-info">
                 <p className="user-name">{displayName}</p>

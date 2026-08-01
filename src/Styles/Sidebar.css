@@ -241,7 +241,7 @@
   height: 100svh;
   width: var(--sidebar-width);
   background: var(--color-black);
-  color: var(--color-white);
+  color: var(--color-fixed-white);
   display: flex;
   flex-direction: column;
   padding: 20px 14px;
@@ -283,7 +283,7 @@
   font-weight: 750;
   font-size: 15px;
   letter-spacing: 0.05em;
-  color: var(--color-white);
+  color: var(--color-fixed-white);
   white-space: nowrap;
 }
 
@@ -294,7 +294,7 @@
   right: 14px;
   background: transparent;
   border: none;
-  color: var(--color-white);
+color: var(--color-fixed-white);
   cursor: pointer;
 }
 
@@ -335,7 +335,7 @@
 
 .nav-link:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: var(--color-white);
+  color: var(--color-fixed-white);
 }
 
 .nav-link.active {
@@ -388,7 +388,7 @@
 .user-info { overflow: hidden; }
 
 .user-name {
-  color: var(--color-white);
+  color: var(--color-fixed-white);
   font-size: 13px;
   font-weight: 600;
   margin: 0;
@@ -453,4 +453,13 @@
     background: rgba(11, 11, 13, 0.5);
     z-index: 99;
   }
+}
+
+
+.sidebar-avatar-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }

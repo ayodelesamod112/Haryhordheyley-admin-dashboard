@@ -22,6 +22,7 @@
   --color-danger: #c93636;
   --color-danger-bg: #fbe9e9;
   --color-neutral-bg: #eeeeec;
+   
 
   --font-display: "Space Grotesk", "Segoe UI", sans-serif;
   --font-body: "Inter", "Segoe UI", sans-serif;
@@ -47,9 +48,12 @@
   --color-muted: #a3a3ab;
   --color-border: #2c2d33;
   --color-neutral-bg: #26272c;
-  color-scheme: dark;
-}
+ color-scheme: light;
 
+  /* Always white — for text sitting on surfaces that are intentionally
+     dark regardless of light/dark theme (sidebars, hero banners, etc.) */
+  --color-fixed-white: #ffffff;
+}
 [data-theme="dark"] h1,
 [data-theme="dark"] h2,
 [data-theme="dark"] h3,

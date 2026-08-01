@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LuLayoutDashboard, LuHouse, LuWrench, LuShoppingBag, LuCreditCard, LuReceipt,
   LuMessageSquare, LuBell, LuUserRound, LuInfo, LuPhone, LuCircleHelp,
-  LuLogOut, LuMenu, LuX,
+  LuLogOut, LuMenu, LuX, LuSun, LuMoon,
 } from "react-icons/lu";
 import { useAuth } from "../Context/AuthContext";
-import { useToast } from "../Context/ToastContext";
-import { useInactivityLogout } from "../hooks/useInactivityLogout";
+import { useCustomerTheme } from "../Context/CustomerThemeContext";
 import { supabase } from "../supabase/supabaseClient";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
-import logo from "../assets/logo.png";
+import Avatar from "../assets/Avatar.png";
 import "../Styles/CustomerPortal.css";
 
 const NAV_ITEMS = [
@@ -33,7 +32,7 @@ const INFO_ITEMS = [
 
 function CustomerLayout() {
   const { profile, user, signOut } = useAuth();
-  const { showToast } = useToast();
+  const { theme, toggleTheme } = useCustomerTheme();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
@@ -75,14 +74,6 @@ function CustomerLayout() {
     navigate("/login");
   };
 
-  const handleInactivityTimeout = useCallback(async () => {
-    await signOut();
-    showToast("You were logged out after 15 minutes of inactivity", "error");
-    navigate("/login");
-  }, [signOut, showToast, navigate]);
-
-  useInactivityLogout(handleInactivityTimeout, 15 * 60 * 1000);
-
   const badgeCount = (key) => {
     if (key === "messages") return unreadMessages;
     if (key === "notifications") return unreadNotifications;
@@ -90,14 +81,17 @@ function CustomerLayout() {
   };
 
   return (
-    <div className="portal-shell-v2">
+    <div className="portal-shell-v2" data-theme={theme}>
       {mobileOpen && <div className="portal-scrim" onClick={() => setMobileOpen(false)} />}
 
       <aside className={`portal-sidebar ${mobileOpen ? "is-mobile-open" : ""}`}>
         <div className="portal-sidebar-top">
           <div className="portal-brand">
-            <img src={logo} alt="HARYHORDHEYLEY" className="portal-logo" />
+            <img src={Avatar} alt="HARYHORDHEYLEY" className="portal-logo" />
             <span>HARYHORDHEYLEY</span>
+            <button type="button" className="portal-theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === "light" ? <LuMoon size={16} /> : <LuSun size={16} />}
+            </button>
           </div>
           <button type="button" className="portal-close-mobile" onClick={() => setMobileOpen(false)} aria-label="Close menu">
             <LuX size={20} />
@@ -139,7 +133,11 @@ function CustomerLayout() {
 
         <div className="portal-sidebar-bottom">
           <div className="portal-profile-card">
-            <div className="portal-avatar-fallback">{displayName.charAt(0).toUpperCase()}</div>
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt={displayName} className="portal-avatar-img" />
+            ) : (
+              <div className="portal-avatar-fallback">{displayName.charAt(0).toUpperCase()}</div>
+            )}
             <div className="portal-user-info">
               <p className="portal-user-name">{displayName}</p>
               <p className="portal-user-role">Customer</p>
