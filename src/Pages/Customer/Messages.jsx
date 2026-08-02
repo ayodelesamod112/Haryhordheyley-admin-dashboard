@@ -75,7 +75,7 @@ function Messages() {
         ) : (
           <div className="message-thread">
             {messages.length === 0 ? (
-              <p style={{ textAlign: "center", color: "var(--color-muted)", padding: 20 }}>No messages yet — say hello!</p>
+              <p style={{ textAlign: "center", color: "var(--color-white)", padding: 20 }}>No messages yet — say hello!</p>
             ) : (
               messages.map((m) => (
                 <div key={m.id} className={`message-bubble ${m.sender_id === user.id ? "mine" : "theirs"}`}>

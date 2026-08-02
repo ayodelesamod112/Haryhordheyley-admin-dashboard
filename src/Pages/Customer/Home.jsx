@@ -5,10 +5,10 @@ import "../../Styles/CustomerPortal.css";
 function Home() {
   return (
     <div className="portal-page">
-      <div className="services-hero" style={{ borderRadius: "var(--radius-lg)", marginBottom: 30 }}>
+      <div className="services-hero" style={{ borderRadius: "var(--radius-lg)", marginBottom: "20px" }}>
         <div className="services-hero-inner">
           <span className="services-hero-eyebrow">HARYHORDHEYLEY Smart Tech Digital Service</span>
-          <h1>Reliable tech services, done right.</h1>
+          <h2 style={{color:"whitesmoke"}}>Reliable Tech Services, Delivered Right Away.</h2>
           <p>From repairs to full digital solutions — we've got you covered.</p>
           <div style={{ marginTop: 20 }}>
             <Link to="/portal/services" className="btn btn-primary">Explore Services <LuArrowRight size={15} /></Link>

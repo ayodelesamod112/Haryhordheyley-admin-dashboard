@@ -39,7 +39,7 @@ function CustomerDashboard() {
   return (
     <div className="portal-page">
       <div className="dash-welcome">
-        <h2>Welcome back, {profile?.full_name || "there"} 👋</h2>
+        <h2 style={{color:"whitesmoke"}}>Welcome back, {profile?.full_name || "there"} 👋</h2>
         <p>Here's a quick look at your orders, payments, and receipts.</p>
         <div className="dash-quick-actions">
           <Link to="/portal/services" className="btn btn-primary"><LuWrench size={15} /> Order a Service</Link>

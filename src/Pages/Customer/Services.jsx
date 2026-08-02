@@ -252,7 +252,7 @@ function Services() {
       <div className="services-hero">
         <div className="services-hero-inner">
           <span className="services-hero-eyebrow">What we offer</span>
-          <h1>Quality Tech Services, Done Right</h1>
+          <h1 style={{color:"whitesmoke"}}>Quality Tech Services, Delivered Right Away.</h1>
           <p>From quick fixes to full digital solutions — find exactly what you need below.</p>
         </div>
       </div>
@@ -260,7 +260,7 @@ function Services() {
       <div className="portal-page" style={{ paddingTop: 30 }}>
         <div className="services-toolbar">
           <div className="toolbar-search" style={{ maxWidth: 280 }}>
-            <LuSearch size={16} />
+            {/* <LuSearch size={} /> */}
             <input type="search" placeholder="Search services…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <select value={category} onChange={(e) => setCategory(e.target.value)}>

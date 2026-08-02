@@ -88,7 +88,7 @@ function CustomerLayout() {
         <div className="portal-sidebar-top">
           <div className="portal-brand">
             <img src={Avatar} alt="HARYHORDHEYLEY" className="portal-logo" />
-            <span>HARYHORDHEYLEY</span>
+            <span style={{color:"white"}}>HARYHORDHEYLEY</span>
           </div>
           <button type="button" className="portal-close-mobile" onClick={() => setMobileOpen(false)} aria-label="Close menu">
             <LuX size={20} />
