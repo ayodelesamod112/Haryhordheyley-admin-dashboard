@@ -1,4 +1,42 @@
-# HARYHORDHEYLEY Smart Tech Digital Service — Admin Dashboard
+#HARYHORDHEYLEY Smart Tech Digital Service – Admin Dashboard
+
+Project Overview
+
+This project is an Admin Dashboard developed for HARYHORDHEYLEY Smart Tech Digital Service. It provides a centralized platform for managing customers, services, orders, payments, users, notifications, reports, and business settings.
+
+Technologies Used
+
+- React.js
+- Vite
+- React Router DOM
+- Supabase (Authentication and Database)
+- CSS
+
+Features
+
+- User Authentication (Login, Signup, Password Reset)
+- Dashboard Statistics and Reports
+- Customer Management
+- Service Management
+- Order Management
+- Payment Management
+- User Management
+- Notifications System
+- Profile and Settings Management
+- Responsive Design
+
+Live Demo
+
+https://haryhordheyley-admin-dashboard.vercel.app
+
+GitHub Repository
+
+https://github.com/ayodelesamod112/Haryhordheyley-admin-dashboard
+
+Author
+
+Ayomide Samod
+MITC (Masroor International Technical College) HARYHORDHEYLEY Smart Tech Digital Service — Admin Dashboard
 
 React + Vite + React Router DOM + Supabase. Pure CSS (no Tailwind).
 
