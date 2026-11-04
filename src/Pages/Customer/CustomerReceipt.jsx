@@ -4,7 +4,7 @@ import { LuPrinter, LuArrowLeft } from "react-icons/lu";
 import { supabase } from "../../supabase/supabaseClient";
 import { useAuth } from "../../Context/AuthContext";
 import Loader from "../../Components/UI/Loader";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.jpg";
 import "../../Styles/Receipt.css";
 
 function CustomerReceipt() {

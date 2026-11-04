@@ -1,12 +1,13 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 
-// Only the admin account can get past this point.
-// A logged-in customer trying to reach admin pages gets sent to their portal instead.
+const ADMIN_ROLES = new Set(["admin", "staff", "super_admin"]);
+
+// Route checks improve navigation; database RLS remains the actual security boundary.
 const AdminOnlyRoute = () => {
   const { profile } = useAuth();
 
-  if (profile?.role !== "admin") {
+  if (!ADMIN_ROLES.has(profile?.role)) {
     return <Navigate to="/portal" replace />;
   }
 

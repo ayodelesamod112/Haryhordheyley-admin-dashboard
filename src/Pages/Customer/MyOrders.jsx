@@ -20,6 +20,8 @@ function MyOrders() {
 
   const [orders, setOrders] = useState([]);
   const [servicesList, setServicesList] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
+  const [servicesError, setServicesError] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ serviceId: "", notes: "" });
@@ -43,8 +45,22 @@ function MyOrders() {
 
   useEffect(() => {
     if (!user) return;
+    let mounted = true;
     loadOrders();
-    supabase.from("services").select("id, name, price").eq("status", "active").order("name").then(({ data }) => setServicesList(data || []));
+    const loadServices = async () => {
+      setServicesLoading(true);
+      const { data, error } = await supabase
+        .from("services")
+        .select("id, name, price")
+        .eq("status", "active")
+        .order("name");
+      if (!mounted) return;
+      setServicesList(data || []);
+      setServicesError(error?.message || "");
+      setServicesLoading(false);
+    };
+    loadServices();
+    return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -54,7 +70,6 @@ function MyOrders() {
       setForm({ serviceId: preselect, notes: "" });
       setModalOpen(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const closeModal = () => {
@@ -71,13 +86,17 @@ function MyOrders() {
       return;
     }
     const service = servicesList.find((s) => s.id === form.serviceId);
+    if (!service) {
+      setFormError("That service is no longer available. Reload the service list and try again.");
+      return;
+    }
     setSaving(true);
     setFormError("");
 
     const { error } = await supabase.from("orders").insert({
       service_id: form.serviceId,
       placed_by: user.id,
-      amount: service?.price || 0,
+      amount: service.price,
       notes: form.notes || null,
       order_status: "pending",
       payment_status: "unpaid",
@@ -91,13 +110,6 @@ function MyOrders() {
       return;
     }
 
-    const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a) => ({ recipient_id: a.id, title: "New order placed", message: `${service?.name || "A service"} was just ordered.` }))
-      );
-    }
-
     showToast("Order placed! We'll get started soon.");
     closeModal();
     loadOrders();
@@ -105,7 +117,7 @@ function MyOrders() {
 
   const handleCancel = async () => {
     setCancelling(true);
-    const { error } = await supabase.from("orders").update({ order_status: "cancelled" }).eq("id", cancelTarget.id);
+    const { error } = await supabase.rpc("cancel_customer_order", { p_order_id: cancelTarget.id });
     setCancelling(false);
     if (error) {
       showToast(error.message, "error");
@@ -174,11 +186,18 @@ function MyOrders() {
             <div className="form-field full">
               <label>Service</label>
               <select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value })} required>
-                <option value="">Select a service</option>
+                <option value="">
+                  {servicesLoading ? "Loading services..." : servicesList.length ? "Select a service" : "No active services available"}
+                </option>
                 {servicesList.map((s) => (
                   <option key={s.id} value={s.id}>{s.name} — {currency(s.price)}</option>
                 ))}
               </select>
+              {servicesError && (
+                <div className="form-error-banner" role="alert">
+                  Could not load services: {servicesError}
+                </div>
+              )}
             </div>
             <div className="form-field full">
               <label>Notes (optional)</label>

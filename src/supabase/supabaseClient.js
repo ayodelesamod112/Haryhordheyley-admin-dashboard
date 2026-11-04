@@ -4,9 +4,8 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  // Fails loudly in dev instead of silently breaking every query later.
-  console.error(
-    "Missing Supabase env vars. Create a .env file from .env.example and set " +
+  throw new Error(
+    "Missing Supabase environment variables. Copy .env.example to .env and set " +
       "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
   );
 }
@@ -18,3 +17,4 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
 });
+

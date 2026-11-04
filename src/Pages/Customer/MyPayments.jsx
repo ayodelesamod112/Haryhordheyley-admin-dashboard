@@ -24,15 +24,27 @@ function MyPayments() {
   const [error, setError] = useState("");
 
   const currency = (n) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n || 0);
+  const selectedOrder = unpaidOrders.find((order) => order.id === form.orderId);
 
   const load = async () => {
     setLoading(true);
     const [{ data: pays }, { data: orders }] = await Promise.all([
       supabase.from("payments").select("*, orders(services(name))").eq("placed_by", user.id).order("created_at", { ascending: false }),
-      supabase.from("orders").select("id, amount, services(name)").eq("placed_by", user.id).eq("payment_status", "unpaid"),
+      supabase.from("orders").select("id, amount, services(name)").eq("placed_by", user.id).in("payment_status", ["unpaid", "partial"]),
     ]);
+    const paidByOrder = (pays || []).reduce((totals, payment) => {
+      if (payment.status === "success") {
+        totals[payment.order_id] = (totals[payment.order_id] || 0) + Number(payment.amount || 0);
+      }
+      return totals;
+    }, {});
     setPayments(pays || []);
-    setUnpaidOrders(orders || []);
+    setUnpaidOrders((orders || [])
+      .map((order) => ({
+        ...order,
+        remainingAmount: Math.max(0, Number(order.amount) - (paidByOrder[order.id] || 0)),
+      }))
+      .filter((order) => order.remainingAmount > 0));
     setLoading(false);
   };
 
@@ -40,6 +52,10 @@ function MyPayments() {
     if (user) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  useEffect(() => () => {
+    if (proofPreview) URL.revokeObjectURL(proofPreview);
+  }, [proofPreview]);
 
   const openCreate = () => {
     setForm({ orderId: "", amount: "", method: "bank_transfer" });
@@ -49,14 +65,36 @@ function MyPayments() {
     setModalOpen(true);
   };
 
+  const closeCreate = () => {
+    setModalOpen(false);
+    setProofFile(null);
+    setProofPreview(null);
+    setError("");
+  };
+
   const onOrderChange = (orderId) => {
     const ord = unpaidOrders.find((o) => o.id === orderId);
-    setForm((prev) => ({ ...prev, orderId, amount: ord ? ord.amount : prev.amount }));
+    setForm((prev) => ({ ...prev, orderId, amount: ord ? ord.remainingAmount : prev.amount }));
   };
 
   const onFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      setProofFile(null);
+      setProofPreview(null);
+      setError("Upload a JPG or PNG image.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setProofFile(null);
+      setProofPreview(null);
+      setError("The proof image must be 5 MB or smaller.");
+      e.target.value = "";
+      return;
+    }
+    setError("");
     setProofFile(file);
     setProofPreview(URL.createObjectURL(file));
   };
@@ -71,12 +109,19 @@ function MyPayments() {
       setError("Please upload proof of payment.");
       return;
     }
+    if (Number(form.amount) <= 0) {
+      setError("Enter a payment amount greater than zero.");
+      return;
+    }
 
     setSaving(true);
     setError("");
 
     const filePath = `${user.id}/${Date.now()}-${proofFile.name}`;
-    const { error: uploadError } = await supabase.storage.from("payment-proofs").upload(filePath, proofFile);
+    const { error: uploadError } = await supabase.storage.from("payment-proofs").upload(filePath, proofFile, {
+      contentType: proofFile.type,
+      upsert: false,
+    });
 
     if (uploadError) {
       setSaving(false);
@@ -84,34 +129,28 @@ function MyPayments() {
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage.from("payment-proofs").getPublicUrl(filePath);
-
     const { error: insertError } = await supabase.from("payments").insert({
       order_id: form.orderId,
       placed_by: user.id,
       amount: Number(form.amount) || 0,
       method: form.method,
       status: "pending",
-      proof_url: publicUrlData.publicUrl,
+      proof_path: filePath,
       paid_at: new Date().toISOString().slice(0, 10),
     });
 
     setSaving(false);
 
     if (insertError) {
+      await supabase.storage.from("payment-proofs").remove([filePath]);
       setError(insertError.message);
       return;
     }
 
-    const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a) => ({ recipient_id: a.id, title: "Payment proof uploaded", message: "A customer uploaded proof of payment — please confirm or reject it." }))
-      );
-    }
-
     showToast("Payment proof submitted — awaiting confirmation.");
     setModalOpen(false);
+    setProofFile(null);
+    setProofPreview(null);
     load();
   };
 
@@ -152,7 +191,7 @@ function MyPayments() {
       )}
 
       {modalOpen && (
-        <Modal title="Upload Payment Proof" onClose={() => setModalOpen(false)}>
+        <Modal title="Upload Payment Proof" onClose={closeCreate}>
           <form onSubmit={handleSubmit}>
             {error && <div className="form-error-banner">{error}</div>}
             <div className="form-field full">
@@ -160,13 +199,13 @@ function MyPayments() {
               <select value={form.orderId} onChange={(e) => onOrderChange(e.target.value)} required>
                 <option value="">Select order</option>
                 {unpaidOrders.map((o) => (
-                  <option key={o.id} value={o.id}>{o.services?.name || "Order"} — {currency(o.amount)}</option>
+                  <option key={o.id} value={o.id}>{o.services?.name || "Order"} — {currency(o.remainingAmount)} remaining</option>
                 ))}
               </select>
             </div>
             <div className="form-field">
               <label>Amount (₦)</label>
-              <input type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
+              <input type="number" min="0.01" max={selectedOrder?.remainingAmount} step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
             </div>
             <div className="form-field">
               <label>Payment method</label>
@@ -179,14 +218,14 @@ function MyPayments() {
               </select>
             </div>
             <div className="form-field full">
-              <label>Proof of payment (screenshot/receipt)</label>
+              <label>Proof of payment (JPG or PNG, up to 5 MB)</label>
               <label className="upload-drop">
                 {proofPreview ? <img src={proofPreview} alt="Proof preview" /> : <><LuUpload size={22} /><p style={{ marginTop: 8 }}>Click to upload an image</p></>}
-                <input type="file" accept="image/*" hidden onChange={onFileChange} />
+                <input type="file" accept="image/jpeg,image/png" hidden onChange={onFileChange} />
               </label>
             </div>
             <div className="form-actions">
-              <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>Cancel</button>
+              <button type="button" className="btn btn-ghost" onClick={closeCreate}>Cancel</button>
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Submitting…" : "Submit Payment"}</button>
             </div>
           </form>

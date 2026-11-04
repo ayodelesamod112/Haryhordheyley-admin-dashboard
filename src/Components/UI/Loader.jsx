@@ -9,7 +9,7 @@
 
 // export default Loader;
 
-import avatar from "../../assets/Avatar.png";
+import avatar from "../../assets/Avatar.jpg";
 
 function Loader({ label = "Loading…" }) {
   return (

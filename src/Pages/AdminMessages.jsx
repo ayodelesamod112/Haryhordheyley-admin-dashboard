@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { LuSend } from "react-icons/lu";
 import { supabase } from "../supabase/supabaseClient";
 import { useAuth } from "../Context/AuthContext";
+import { useToast } from "../Context/ToastContext";
 import Loader from "../Components/UI/Loader";
 import EmptyState from "../Components/UI/EmptyState";
+import "../Styles/AdminMessages.css";
 
 function AdminMessages() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [threads, setThreads] = useState([]);
   const [activeCustomerId, setActiveCustomerId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -59,12 +62,20 @@ function AdminMessages() {
     if (!reply.trim() || !activeCustomerId) return;
     setSending(true);
 
-    await supabase.from("messages").insert({ customer_id: activeCustomerId, sender_id: user.id, body: reply.trim() });
-    await supabase.from("notifications").insert({ recipient_id: activeCustomerId, title: "New reply", message: reply.trim() });
+    const { error } = await supabase.from("messages").insert({
+      customer_id: activeCustomerId,
+      sender_id: user.id,
+      body: reply.trim(),
+    });
 
-    setReply("");
     setSending(false);
-    openThread(activeCustomerId);
+    if (error) {
+      showToast(error.message, "error");
+      return;
+    }
+    setReply("");
+    await openThread(activeCustomerId);
+    showToast("Reply sent");
   };
 
   return (
@@ -77,23 +88,20 @@ function AdminMessages() {
         </div>
       </div>
 
-      <div className="card" style={{ display: "grid", gridTemplateColumns: "280px 1fr", minHeight: 480 }}>
-        <div style={{ borderRight: "1px solid var(--color-border)", overflowY: "auto" }}>
+      <div className="card admin-messages-shell">
+        <div className="admin-message-list">
           {loadingThreads ? (
             <Loader label="Loading conversations…" />
           ) : threads.length === 0 ? (
             <EmptyState title="No messages yet" />
           ) : (
             threads.map((t) => (
-              <div
+              <button
+                type="button"
+                aria-pressed={activeCustomerId === t.customerId}
                 key={t.customerId}
                 onClick={() => openThread(t.customerId)}
-                style={{
-                  padding: "14px 16px",
-                  cursor: "pointer",
-                  borderBottom: "1px solid var(--color-border)",
-                  background: activeCustomerId === t.customerId ? "var(--color-surface)" : "transparent",
-                }}
+                className={`admin-message-row ${activeCustomerId === t.customerId ? "active" : ""}`}
               >
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <strong style={{ fontSize: 13 }}>{t.name || "Customer"}</strong>
@@ -102,19 +110,19 @@ function AdminMessages() {
                 <p style={{ fontSize: 12, color: "var(--color-muted)", marginTop: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {t.lastMessage.body}
                 </p>
-              </div>
+              </button>
             ))
           )}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div className="admin-message-conversation">
           {!activeCustomerId ? (
             <div style={{ margin: "auto", color: "var(--color-muted)" }}>Select a conversation to view it</div>
           ) : loadingMessages ? (
             <Loader label="Loading messages…" />
           ) : (
             <>
-              <div style={{ flex: 1, overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="admin-message-thread">
                 {messages.map((m) => (
                   <div
                     key={m.id}

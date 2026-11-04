@@ -15,8 +15,15 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
-      parserOptions: { ecmaFeatures: {} },
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    rules: {
+      // This app sets loading state while effect-driven Supabase requests run.
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
 ])
- jsx: true 

@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LuLayoutDashboard, LuHouse, LuWrench, LuShoppingBag, LuCreditCard, LuReceipt,
   LuMessageSquare, LuBell, LuUserRound, LuInfo, LuPhone, LuCircleHelp,
-  LuLogOut, LuMenu, LuX,
+  LuLogOut, LuMenu, LuX, LuChevronDown, LuSun, LuMoon,
 } from "react-icons/lu";
 import { useAuth } from "../Context/AuthContext";
+import { useToast } from "../Context/ToastContext";
 import { useCustomerTheme } from "../Context/CustomerThemeContext";
+import { useInactivityLogout } from "../hooks/useInactivityLogout";
 import { supabase } from "../supabase/supabaseClient";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
-import Avatar from "../assets/Avatar.png";
+import Avatar from "../assets/Avatar.jpg";
 import "../Styles/CustomerPortal.css";
 
 const NAV_ITEMS = [
   { to: "/portal", label: "Dashboard", icon: LuLayoutDashboard, end: true },
-  { to: "/portal/home", label: "Home", icon: LuHouse },
   { to: "/portal/services", label: "Services", icon: LuWrench },
   { to: "/portal/orders", label: "My Orders", icon: LuShoppingBag },
   { to: "/portal/payments", label: "My Payments", icon: LuCreditCard },
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
 ];
 
 const INFO_ITEMS = [
+  { to: "/portal/home", label: "Company Home", icon: LuHouse },
   { to: "/portal/about", label: "About Us", icon: LuInfo },
   { to: "/portal/contact", label: "Contact Us", icon: LuPhone },
   { to: "/portal/faq", label: "FAQ", icon: LuCircleHelp },
@@ -32,15 +34,28 @@ const INFO_ITEMS = [
 
 function CustomerLayout() {
   const { profile, user, signOut } = useAuth();
-  const { theme } = useCustomerTheme();
+  const { showToast } = useToast();
+  const { theme, toggleTheme } = useCustomerTheme();
+  const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [companyOpen, setCompanyOpen] = useState(false);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const displayName = profile?.full_name || user?.email || "there";
+  const isCompanyRoute = INFO_ITEMS.some((item) => item.to === location.pathname);
+  const companyExpanded = companyOpen || isCompanyRoute;
+
+  const handleInactivityTimeout = useCallback(async () => {
+    await signOut();
+    showToast("You were logged out after 15 minutes of inactivity", "error");
+    navigate("/login", { replace: true });
+  }, [signOut, showToast, navigate]);
+
+  useInactivityLogout(handleInactivityTimeout, 15 * 60 * 1000, Boolean(user?.id));
 
   useEffect(() => {
     if (!user) return;
@@ -113,8 +128,16 @@ function CustomerLayout() {
               );
             })}
 
-            <p className="portal-menu-label">COMPANY</p>
-            {INFO_ITEMS.map(({ to, label, icon: Icon }) => (
+            <button
+              type="button"
+              className="portal-menu-label portal-menu-group-toggle"
+              onClick={() => setCompanyOpen((open) => !open)}
+              aria-expanded={companyExpanded}
+            >
+              <span>COMPANY</span>
+              <LuChevronDown className={companyExpanded ? "is-open" : ""} size={15} />
+            </button>
+            {companyExpanded && INFO_ITEMS.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -129,6 +152,16 @@ function CustomerLayout() {
         </div>
 
         <div className="portal-sidebar-bottom">
+          <button
+            type="button"
+            className="portal-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} customer theme`}
+            aria-pressed={theme === "dark"}
+          >
+            {theme === "light" ? <LuMoon size={17} /> : <LuSun size={17} />}
+            <span>Switch to {theme === "light" ? "dark" : "light"} mode</span>
+          </button>
           <div className="portal-profile-card">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt={displayName} className="portal-avatar-img" />

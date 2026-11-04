@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { LuSend } from "react-icons/lu";
 import { supabase } from "../../supabase/supabaseClient";
 import { useAuth } from "../../Context/AuthContext";
+import { useToast } from "../../Context/ToastContext";
 import Loader from "../../Components/UI/Loader";
 import "../../Styles/CustomerPortal.css";
 
 function Messages() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [body, setBody] = useState("");
@@ -47,18 +49,13 @@ function Messages() {
     });
 
     setSending(false);
-    if (!error) {
-      setBody("");
-      load();
-
-      // notify admins of the new message
-      const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-      if (admins?.length) {
-        await supabase.from("notifications").insert(
-          admins.map((a) => ({ recipient_id: a.id, title: "New message", message: "A customer sent you a message." }))
-        );
-      }
+    if (error) {
+      showToast(error.message, "error");
+      return;
     }
+    setBody("");
+    await load();
+    showToast("Message sent");
   };
 
   return (

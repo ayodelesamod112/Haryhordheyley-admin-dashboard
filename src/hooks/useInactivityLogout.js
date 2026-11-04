@@ -9,8 +9,10 @@ const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
  * Uses a ref for the callback so the listener setup only runs ONCE,
  * even if the caller passes a new function reference on every render.
  */
-export function useInactivityLogout(onTimeout, timeoutMs = DEFAULT_TIMEOUT_MS) {
+export function useInactivityLogout(onTimeout, timeoutMs = DEFAULT_TIMEOUT_MS, enabled = true) {
   const timerRef = useRef(null);
+  const lastActivityRef = useRef(0);
+  const expiredRef = useRef(false);
   const callbackRef = useRef(onTimeout);
 
   // Always keep the ref pointing at the latest callback, without
@@ -20,18 +22,47 @@ export function useInactivityLogout(onTimeout, timeoutMs = DEFAULT_TIMEOUT_MS) {
   }, [onTimeout]);
 
   useEffect(() => {
-    const resetTimer = () => {
+    if (!enabled) return undefined;
+
+    const clearTimer = () => {
       if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => callbackRef.current?.(), timeoutMs);
     };
 
-    const activityEvents = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"];
-    activityEvents.forEach((evt) => window.addEventListener(evt, resetTimer));
-    resetTimer();
+    const checkTimeout = () => {
+      clearTimer();
+      if (expiredRef.current) return;
+
+      const remaining = timeoutMs - (Date.now() - lastActivityRef.current);
+      if (remaining <= 0) {
+        expiredRef.current = true;
+        callbackRef.current?.();
+        return;
+      }
+      timerRef.current = window.setTimeout(checkTimeout, remaining);
+    };
+
+    const recordActivity = () => {
+      if (expiredRef.current) return;
+      lastActivityRef.current = Date.now();
+      checkTimeout();
+    };
+
+    const checkWhenVisible = () => {
+      if (document.visibilityState === "visible") checkTimeout();
+    };
+
+    const activityEvents = ["pointerdown", "pointermove", "keydown", "touchstart", "wheel", "scroll"];
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, recordActivity, { passive: true }));
+    window.addEventListener("focus", checkWhenVisible);
+    document.addEventListener("visibilitychange", checkWhenVisible);
+    lastActivityRef.current = Date.now();
+    checkTimeout();
 
     return () => {
-      activityEvents.forEach((evt) => window.removeEventListener(evt, resetTimer));
-      if (timerRef.current) clearTimeout(timerRef.current);
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, recordActivity));
+      window.removeEventListener("focus", checkWhenVisible);
+      document.removeEventListener("visibilitychange", checkWhenVisible);
+      clearTimer();
     };
-  }, [timeoutMs]);
+  }, [timeoutMs, enabled]);
 }

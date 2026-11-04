@@ -31,12 +31,14 @@ import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { useAuth } from "../Context/AuthContext";
 import { useToast } from "../Context/ToastContext";
+import { useTheme } from "../Context/ThemeContext";
 import { useInactivityLogout } from "../hooks/useInactivityLogout";
 import "../Styles/Layout.css";
 
 const Layout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { signOut } = useAuth();
+  const { theme } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ const Layout = () => {
   useInactivityLogout(handleInactivityTimeout, 15 * 60 * 1000);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-admin-theme={theme}>
       <Sidebar collapsed={false} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
       <div className="app-main">
         <Navbar onOpenMobileSidebar={() => setMobileOpen(true)} />

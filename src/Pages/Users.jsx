@@ -395,6 +395,10 @@ function Users() {
                   }
                 >
 
+                  <option value="customer">
+                    Customer
+                  </option>
+
                   <option value="admin">
                     Admin
                   </option>

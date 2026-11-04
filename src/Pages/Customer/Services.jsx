@@ -178,7 +178,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LuWrench, LuSmartphone, LuLaptop, LuWifi, LuShieldCheck, LuSparkles,
-  LuArrowRight, LuPhone, LuSearch, LuChevronDown,
+  LuArrowRight, LuPhone, LuChevronDown,
 } from "react-icons/lu";
 import { supabase } from "../../supabase/supabaseClient";
 import Loader from "../../Components/UI/Loader";
