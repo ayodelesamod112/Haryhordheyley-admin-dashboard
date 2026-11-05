@@ -66,7 +66,7 @@ function Messages() {
         <p>Chat directly with the HARYHORDHEYLEY team.</p>
       </div>
 
-      <div className="portal-card" style={{ padding: 0 }}>
+      <div className="portal-card customer-message-panel" style={{ padding: 0 }}>
         {loading ? (
           <Loader label="Loading conversation…" />
         ) : (

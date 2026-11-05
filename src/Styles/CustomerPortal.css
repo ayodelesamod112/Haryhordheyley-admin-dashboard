@@ -341,13 +341,15 @@
 .contact-info-item p { font-size: 13px; }
 
 /* Messages thread */
-.message-thread { display: flex; flex-direction: column; gap: 10px; padding: 20px; max-height: 480px; overflow-y: auto; }
-.message-bubble { max-width: 70%; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; }
-.message-bubble.mine { align-self: flex-end;  background: var(--color-neutral-bg); color: var(--color-fixed-white); }
-.message-bubble.theirs { align-self: flex-start; background: var(--color-neutral-bg); color: var(--color-ink); }
-.message-bubble-time { font-size: 10px; opacity: 0.6; margin-top: 4px; display: block; }
-.message-input-row { display: flex; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--color-border); }
-.message-input-row input { flex: 1; }
+.customer-message-panel { overflow: hidden; background: #080808; border-color: #272727; }
+.message-thread { display: flex; flex-direction: column; gap: 10px; padding: 20px; max-height: 480px; overflow-y: auto; background: #080808; }
+.message-bubble { max-width: 70%; padding: 10px 14px; border-radius: var(--radius-md); background: #1d1d1d; color: #fff; font-size: 13px; line-height: 1.5; }
+.message-bubble.mine { align-self: flex-end; background: #2f280d; color: #fff; border: 1px solid rgba(255,199,44,.26); }
+.message-bubble.theirs { align-self: flex-start; background: #1d1d1d; color: #fff; border: 1px solid #343434; }
+.message-bubble-time { color: #c8c8c8; font-size: 10px; opacity: .85; margin-top: 4px; display: block; }
+.message-input-row { display: flex; gap: 10px; padding: 14px 20px; background: #080808; border-top: 1px solid #333; }
+.message-input-row input { flex: 1; min-width: 0; background: #171717; border: 1px solid #444; color: #fff; }
+.message-input-row input::placeholder { color: #aaa; }
 
 /* ================================================================
    Customer portal dark mode — scoped to .portal-shell-v2 only, so it
