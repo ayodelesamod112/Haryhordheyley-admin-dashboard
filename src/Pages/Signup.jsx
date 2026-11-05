@@ -216,7 +216,7 @@ function Signup() {
     }
 
     if (!data.session) {
-      setInfo("Account created! It's now awaiting approval from an admin before you can log in.");
+      setInfo("Account created. Check your email to confirm your account, then log in.");
       return;
     }
 

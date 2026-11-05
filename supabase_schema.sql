@@ -13,7 +13,7 @@ create table if not exists public.profiles (
   avatar_url text,
   role text not null default 'customer'
     check (role in ('customer', 'admin', 'staff', 'super_admin')),
-  status text not null default 'pending'
+  status text not null default 'active'
     check (status in ('pending', 'active', 'suspended')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -150,7 +150,7 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', new.email),
     'customer',
-    'pending'
+    'active'
   );
   return new;
 end;
@@ -213,7 +213,7 @@ begin
 
     insert into public.notifications (recipient_id, title, message)
     select profiles.id, 'New customer signup',
-      coalesce(new.full_name, 'A new customer') || ' created an account and is awaiting approval.'
+      coalesce(new.full_name, 'A new customer') || ' created an account.'
       from public.profiles as profiles
       where profiles.role in ('admin', 'staff', 'super_admin')
         and profiles.status = 'active';

@@ -63,7 +63,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
 import Loader from "../Components/UI/Loader";
-import PendingApproval from "../Pages/PendingApproval";
 
 // Just checks that someone is logged in at all. Which pages they can
 // actually see beyond that is handled by AdminOnlyRoute / CustomerOnlyRoute.
@@ -95,11 +94,7 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
-  if (profile.status === "pending") {
-    return <PendingApproval />;
-  }
-
-  if (profile.status !== "active") {
+  if (profile.status !== "active" && profile.status !== "pending") {
     return <Navigate to="/login" replace />;
   }
 
