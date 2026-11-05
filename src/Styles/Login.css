@@ -3,9 +3,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-black);
-  background-image: radial-gradient(circle at 15% 15%, rgba(255, 199, 44, 0.12), transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(255, 199, 44, 0.08), transparent 45%);
+  background: var(--color-surface);
+  background-image: radial-gradient(circle at 15% 15%, rgba(255, 199, 44, 0.14), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(255, 199, 44, 0.1), transparent 45%);
   padding: 24px;
 }
 
@@ -17,16 +17,25 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
+  border: 1px solid var(--color-border);
 }
+
+.auth-card-compact { display:block; max-width:460px; padding:34px; }
+.auth-card-compact .auth-logo { display:block; margin:0 auto 22px; }
+.auth-card-compact h2 { color:var(--color-ink); font-size:25px; margin:8px 0; }
+.auth-card-compact .eyebrow { display:block; color:var(--color-yellow-deep); font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.auth-card-compact .auth-subtitle { color:var(--color-muted); line-height:1.6; }
+.auth-card-compact .input-group input { width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); background:#fff; color:var(--color-ink); }
 
 .auth-side-panel {
   flex: 1;
-  background: var(--color-black);
-  color: var(--color-white);
+  background: #fff;
+  color: var(--color-ink);
   padding: 44px 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-right: 1px solid var(--color-border);
 }
 
 .auth-side-panel .eyebrow {
@@ -40,14 +49,14 @@
 }
 
 .auth-side-panel h1 {
-  color: var(--color-white);
+  color: var(--color-ink);
   font-size: 26px;
   line-height: 1.25;
   margin-bottom: 14px;
 }
 
 .auth-side-panel p.intro {
-  color: #c8c8ce;
+  color: var(--color-muted);
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 26px;
@@ -78,13 +87,13 @@
 }
 
 .auth-feature-text h4 {
-  color: var(--color-white);
+  color: var(--color-ink);
   font-size: 13px;
   margin: 0 0 2px;
 }
 
 .auth-feature-text p {
-  color: #9a9aa2;
+  color: var(--color-muted);
   font-size: 12px;
   margin: 0;
 }
@@ -216,4 +225,9 @@
 .auth-footer a {
   color: var(--color-yellow-deep);
   font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .auth-card-compact { padding:26px 22px; }
+  .auth-container { padding:16px; }
 }

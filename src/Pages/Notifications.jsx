@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LuBellOff, LuCheck } from "react-icons/lu";
+import { LuCheck } from "react-icons/lu";
 import { supabase } from "../supabase/supabaseClient";
 import { useAuth } from "../Context/AuthContext";
 import Loader from "../Components/UI/Loader";

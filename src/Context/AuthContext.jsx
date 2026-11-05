@@ -14,23 +14,60 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
     const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
-    if (!error) setProfile(data);
+    if (error) {
+      setProfile(null);
+      return null;
+    }
+    setProfile(data);
     return data;
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      loadProfile(session?.user?.id);
-      setLoading(false);
-    });
+    let mounted = true;
+
+    const restoreSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!mounted) return;
+
+        setSession(data.session);
+        if (data.session?.user?.id) {
+          await loadProfile(data.session.user.id);
+        } else {
+          setProfile(null);
+        }
+      } catch (error) {
+        console.error("Unable to restore the Supabase session:", error.message);
+        if (mounted) {
+          setSession(null);
+          setProfile(null);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    restoreSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      loadProfile(newSession?.user?.id);
+      if (!newSession) {
+        setProfile(null);
+        return;
+      }
+
+      // Supabase advises against awaiting another Supabase request inside this
+      // callback because it can hold the auth lock. Load the profile after it exits.
+      window.setTimeout(() => {
+        if (mounted) loadProfile(newSession.user.id);
+      }, 0);
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async ({ email, password, fullName }) => {
@@ -40,29 +77,7 @@ export const AuthProvider = ({ children }) => {
       options: { data: { full_name: fullName } },
     });
 
-    if (!error && data?.user) {
-      const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-      if (admins?.length) {
-        await supabase.from("notifications").insert(
-          admins.map((a) => ({ recipient_id: a.id, title: "New customer signup", message: `${fullName || email} just created an account.` }))
-        );
-      }
-    }
-
     return { data, error };
-  };
-
-  // Lets the admin know whenever a customer logs in
-  const notifyAdminsOfCustomerLogin = async (customerName) => {
-    const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-    if (!admins || admins.length === 0) return;
-
-    const rows = admins.map((admin) => ({
-      recipient_id: admin.id,
-      title: "Customer login",
-      message: `${customerName || "A customer"} just logged in to the website.`,
-    }));
-    await supabase.from("notifications").insert(rows);
   };
 
   const signIn = async ({ email, password }) => {
@@ -70,10 +85,7 @@ export const AuthProvider = ({ children }) => {
 
     if (!error && data?.session) {
       setSession(data.session);
-      const loggedInProfile = await loadProfile(data.user.id);
-      if (loggedInProfile?.role === "customer") {
-        notifyAdminsOfCustomerLogin(loggedInProfile.full_name);
-      }
+      await loadProfile(data.user.id);
     }
 
     return { data, error };

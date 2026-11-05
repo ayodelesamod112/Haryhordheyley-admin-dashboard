@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./Layout/Layout";
 import ProtectedRoute from "./Layout/ProtectedRoutes";
@@ -6,44 +7,45 @@ import AdminOnlyRoute from "./Layout/AdminOnlyRoute";
 import CustomerOnlyRoute from "./Layout/CustomerOnlyRoute";
 import CustomerLayout from "./Layout/CustomerLayout";
 
-import Login from "./Pages/Login";
-import Signup from "./Pages/Signup";
-import ForgotPassword from "./Pages/ForgotPassword";
-import ResetPassword from "./Pages/ResetPassword";
+const Login = lazy(() => import("./Pages/Login"));
+const Signup = lazy(() => import("./Pages/Signup"));
+const ForgotPassword = lazy(() => import("./Pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./Pages/ResetPassword"));
 
 // Admin pages
-import Dashboard from "./Pages/Dashboard";
-import Customers from "./Pages/Customers";
-import Services from "./Pages/Services";
-import Orders from "./Pages/Orders";
-import Payments from "./Pages/Payments";
-import Users from "./Pages/Users";
-import Reports from "./Pages/Reports";
-import Notifications from "./Pages/Notifications";
-import AdminMessages from "./Pages/AdminMessages";
-import Settings from "./Pages/Settings";
-import Profile from "./Pages/Profile";
-import Receipt from "./Pages/Receipt";
+const Dashboard = lazy(() => import("./Pages/Dashboard"));
+const Customers = lazy(() => import("./Pages/Customers"));
+const Services = lazy(() => import("./Pages/Services"));
+const Orders = lazy(() => import("./Pages/Orders"));
+const Payments = lazy(() => import("./Pages/Payments"));
+const Users = lazy(() => import("./Pages/Users"));
+const Reports = lazy(() => import("./Pages/Reports"));
+const Notifications = lazy(() => import("./Pages/Notifications"));
+const AdminMessages = lazy(() => import("./Pages/AdminMessages"));
+const Settings = lazy(() => import("./Pages/Settings"));
+const Profile = lazy(() => import("./Pages/Profile"));
+const Receipt = lazy(() => import("./Pages/Receipt"));
 
 // Customer portal pages
-import CustomerDashboard from "./Pages/Customer/CustomerDashboard";
-import CustomerHome from "./Pages/Customer/Home";
-import CustomerServices from "./Pages/Customer/Services";
-import MyOrders from "./Pages/Customer/MyOrders";
-import MyPayments from "./Pages/Customer/MyPayments";
-import MyReceipts from "./Pages/Customer/MyReceipts";
-import CustomerReceipt from "./Pages/Customer/CustomerReceipt";
-import CustomerMessages from "./Pages/Customer/Messages";
-import CustomerNotifications from "./Pages/Customer/Notifications";
-import CustomerAboutUs from "./Pages/Customer/AboutUs";
-import ContactUs from "./Pages/Customer/ContactUs";
-import FAQ from "./Pages/Customer/FAQ";
+const CustomerDashboard = lazy(() => import("./Pages/Customer/CustomerDashboard"));
+const CustomerHome = lazy(() => import("./Pages/Customer/Home"));
+const CustomerServices = lazy(() => import("./Pages/Customer/Services"));
+const MyOrders = lazy(() => import("./Pages/Customer/MyOrders"));
+const MyPayments = lazy(() => import("./Pages/Customer/MyPayments"));
+const MyReceipts = lazy(() => import("./Pages/Customer/MyReceipts"));
+const CustomerReceipt = lazy(() => import("./Pages/Customer/CustomerReceipt"));
+const CustomerMessages = lazy(() => import("./Pages/Customer/Messages"));
+const CustomerNotifications = lazy(() => import("./Pages/Customer/Notifications"));
+const CustomerAboutUs = lazy(() => import("./Pages/Customer/AboutUs"));
+const ContactUs = lazy(() => import("./Pages/Customer/ContactUs"));
+const FAQ = lazy(() => import("./Pages/Customer/FAQ"));
 
-import NotFound from "./Pages/NotFound";
+const NotFound = lazy(() => import("./Pages/NotFound"));
 
 function App() {
   return (
     <BrowserRouter>
+      <Suspense fallback={<div className="route-loading" role="status">Loading page…</div>}>
       <Routes>
         {/* Public — redirects to the right area if already logged in */}
         <Route element={<PublicOnlyRoute />}>
@@ -103,6 +105,7 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

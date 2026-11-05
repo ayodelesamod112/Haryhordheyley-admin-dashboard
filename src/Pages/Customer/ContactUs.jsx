@@ -6,7 +6,7 @@ import { useToast } from "../../Context/ToastContext";
 import "../../Styles/CustomerPortal.css";
 
 function ContactUs() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { showToast } = useToast();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -21,16 +21,18 @@ function ContactUs() {
     if (!message.trim()) return;
     setSending(true);
 
-    await supabase.from("messages").insert({ customer_id: user.id, sender_id: user.id, body: message.trim() });
-
-    const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a) => ({ recipient_id: a.id, title: `Message from ${profile?.full_name || "a customer"}`, message: message.trim() }))
-      );
-    }
+    const { error } = await supabase.from("messages").insert({
+      customer_id: user.id,
+      sender_id: user.id,
+      body: message.trim(),
+    });
 
     setSending(false);
+    if (error) {
+      showToast(error.message, "error");
+      return;
+    }
+
     setMessage("");
     showToast("Message sent — we'll get back to you soon.");
   };

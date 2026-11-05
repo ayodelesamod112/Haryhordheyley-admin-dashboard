@@ -14,6 +14,7 @@
   --color-ink: #14141a;
   --color-muted: #6b6b76;
   --color-border: #e7e7e2;
+  --color-fixed-white: #ffffff;
 
   --color-success: #1c8a4b;
   --color-success-bg: #e6f6ec;
@@ -41,24 +42,23 @@
   color-scheme: light;
 }
 
-[data-theme="dark"] {
+.app-shell[data-admin-theme="dark"] {
   --color-white: #1b1c20;
   --color-surface: #121214;
   --color-ink: #f2f2f0;
   --color-muted: #a3a3ab;
   --color-border: #2c2d33;
   --color-neutral-bg: #26272c;
- color-scheme: light;
+  color-scheme: dark;
 
   /* Always white — for text sitting on surfaces that are intentionally
      dark regardless of light/dark theme (sidebars, hero banners, etc.) */
-  --color-fixed-white: #ffffff;
 }
-[data-theme="dark"] h1,
-[data-theme="dark"] h2,
-[data-theme="dark"] h3,
-[data-theme="dark"] h4,
-[data-theme="dark"] h5 {
+.app-shell[data-admin-theme="dark"] h1,
+.app-shell[data-admin-theme="dark"] h2,
+.app-shell[data-admin-theme="dark"] h3,
+.app-shell[data-admin-theme="dark"] h4,
+.app-shell[data-admin-theme="dark"] h5 {
   color: var(--color-ink);
 }
 

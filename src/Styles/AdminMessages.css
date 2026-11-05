@@ -1,0 +1,68 @@
+.admin-messages-shell {
+  display: grid;
+  min-height: 480px;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+}
+
+.admin-message-list {
+  min-width: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--color-border);
+}
+
+.admin-message-row {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.admin-message-row:hover,
+.admin-message-row.active {
+  background: var(--color-surface);
+}
+
+.admin-message-row:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.admin-message-conversation {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.admin-message-thread {
+  display: flex;
+  min-height: 360px;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+@media (max-width: 720px) {
+  .admin-messages-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-message-list {
+    max-height: 220px;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .admin-message-thread {
+    min-height: 300px;
+    padding: 14px;
+  }
+}

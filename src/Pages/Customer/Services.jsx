@@ -175,13 +175,14 @@
 // export default Services;
 
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   LuWrench, LuSmartphone, LuLaptop, LuWifi, LuShieldCheck, LuSparkles,
-  LuArrowRight, LuPhone, LuSearch, LuChevronDown,
+  LuArrowRight, LuPhone, LuChevronDown, LuSearch,
 } from "react-icons/lu";
 import { supabase } from "../../supabase/supabaseClient";
 import Loader from "../../Components/UI/Loader";
+import { CUSTOMER_SERVICE_CATALOG } from "../../data/customerServices";
 import "../../Styles/CustomerPortal.css";
 
 const ICON_RULES = [
@@ -213,11 +214,28 @@ const FAQS = [
 
 function Services() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
+
+  const displayedServices = useMemo(() => {
+    const savedByName = new Map(services.map((service) => [service.name.toLowerCase(), service]));
+    const catalogServices = CUSTOMER_SERVICE_CATALOG.map((catalogService) => {
+      const saved = savedByName.get(catalogService.name.toLowerCase());
+      if (saved) savedByName.delete(catalogService.name.toLowerCase());
+      return saved
+        ? { ...catalogService, ...saved, requestOnly: false }
+        : { ...catalogService, id: `request-${catalogService.name}`, requestOnly: true, description: "Available on request. Ask our team for details and a quote." };
+    });
+    return [...catalogServices, ...savedByName.values()];
+  }, [services]);
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+  }, [searchParams]);
 
   useEffect(() => {
     const load = async () => {
@@ -228,9 +246,9 @@ function Services() {
     load();
   }, []);
 
-  const categories = useMemo(() => Array.from(new Set(services.map((s) => s.category).filter(Boolean))), [services]);
+  const categories = useMemo(() => Array.from(new Set(displayedServices.map((s) => s.category).filter(Boolean))), [displayedServices]);
 
-  const filtered = services.filter((s) => {
+  const filtered = displayedServices.filter((s) => {
     const matchesSearch = !search.trim() || s.name.toLowerCase().includes(search.trim().toLowerCase());
     const matchesCategory = !category || s.category === category;
     return matchesSearch && matchesCategory;
@@ -244,7 +262,7 @@ function Services() {
   }, {});
 
   const handleOrderNow = (service) => {
-    navigate(`/portal/orders?serviceId=${service.id}`);
+    navigate(`/portal/orders?service=${encodeURIComponent(service.name)}`);
   };
 
   return (
@@ -260,7 +278,7 @@ function Services() {
       <div className="portal-page" style={{ paddingTop: 30 }}>
         <div className="services-toolbar">
           <div className="toolbar-search" style={{ maxWidth: 280 }}>
-            {/* <LuSearch size={} /> */}
+            <LuSearch size={16} aria-hidden="true" />
             <input type="search" placeholder="Search services…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -290,7 +308,8 @@ function Services() {
                     <h3>{s.name}</h3>
                     {s.description && <p className="service-tile-desc">{s.description}</p>}
                     <div className="service-tile-footer">
-                      <button type="button" className="btn btn-primary btn-sm" onClick={() => handleOrderNow(s)}>Order Now</button>
+                      <span className="service-tile-price">{s.requestOnly ? "Quote on request" : ""}</span>
+                      <button type="button" className="btn btn-primary btn-sm" onClick={() => handleOrderNow(s)}>{s.requestOnly ? "Request Service" : "Order Now"}</button>
                     </div>
                   </div>
                 ))}

@@ -6,7 +6,7 @@
 // import { LuEye, LuEyeOff } from "react-icons/lu";
 // import { useAuth } from "../Context/AuthContext";
 // import AuthSidePanel from "../Components/AuthSidePanel";
-// import Avatar from "../assets/Avatar.png";
+// import Avatar from "../assets/Avatar.jpg";
 
 // function Signup() {
 //   const [formData, setFormData] = useState({
@@ -165,7 +165,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import { useAuth } from "../Context/AuthContext";
 import AuthSidePanel from "../Components/AuthSidePanel";
-import Avatar from "../assets/Avatar.png";
+import Avatar from "../assets/Avatar.jpg";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -233,7 +233,7 @@ function Signup() {
           <form onSubmit={handleSubmit}>
             <span className="eyebrow">Create an Account</span>
             <h2>Get started</h2>
-            <p className="auth-subtitle">Set up access to the HARYHORDHEYLEY admin dashboard.</p>
+            <p className="auth-subtitle">Create a customer account to order services and track your requests. An administrator must approve new accounts.</p>
 
             {error && <p className="auth-error">{error}</p>}
             {info && <p className="auth-info">{info}</p>}

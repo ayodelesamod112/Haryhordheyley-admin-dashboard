@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LuTarget, LuEye, LuHeart, LuUsers, LuPhone, LuMail, LuMapPin } from "react-icons/lu";
+import { LuTarget, LuEye, LuHeart, LuPhone, LuMail, LuMapPin } from "react-icons/lu";
 import { supabase } from "../../supabase/supabaseClient";
 import "../../Styles/CustomerPortal.css";
 

@@ -18,7 +18,7 @@ function Payments() {
   const { user } = useAuth();
   const {
     rows, loading, error, page, setPage, totalPages, filters, setFilters,
-    createRow, deleteRow,
+    createRow, updateRow, deleteRow,
   } = useCrudTable("payments", { selectQuery: "*, orders(id, customers(name))" });
 
   const [orders, setOrders] = useState([]);
@@ -28,6 +28,22 @@ function Payments() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [proofLinks, setProofLinks] = useState({});
+
+  useEffect(() => {
+    let current = true;
+    const loadProofLinks = async () => {
+      const links = await Promise.all(rows.filter((payment) => payment.proof_path).map(async (payment) => {
+        const { data, error: proofError } = await supabase.storage
+          .from("payment-proofs")
+          .createSignedUrl(payment.proof_path, 15 * 60);
+        return [payment.id, proofError ? "" : data?.signedUrl || ""];
+      }));
+      if (current) setProofLinks(Object.fromEntries(links));
+    };
+    loadProofLinks();
+    return () => { current = false; };
+  }, [rows]);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -100,6 +116,15 @@ function Payments() {
     setDeleteTarget(null);
   };
 
+  const reviewPayment = async (payment, status) => {
+    const { error: reviewError } = await updateRow(payment.id, { status });
+    if (reviewError) {
+      showToast(reviewError.message, "error");
+      return;
+    }
+    showToast(status === "success" ? "Payment approved" : "Payment rejected");
+  };
+
   return (
     <div className="page">
       <div className="page-head">
@@ -148,8 +173,9 @@ function Payments() {
                     <th>Amount</th>
                     <th>Method</th>
                     <th>Status</th>
+                    <th>Proof</th>
                     <th>Date</th>
-                    <th></th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -159,9 +185,22 @@ function Payments() {
                       <td>{currency(p.amount)}</td>
                       <td className="cell-muted">{String(p.method).replace("_", " ")}</td>
                       <td><StatusBadge status={p.status} /></td>
+                      <td>
+                        {p.proof_path ? (
+                          proofLinks[p.id] ? (
+                            <a href={proofLinks[p.id]} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">View proof</a>
+                          ) : p.id in proofLinks ? <span className="cell-muted">Unavailable</span> : <span className="cell-muted">Loading…</span>
+                        ) : <span className="cell-muted">—</span>}
+                      </td>
                       <td className="cell-muted">{new Date(p.paid_at).toLocaleDateString()}</td>
                       <td>
                         <div className="row-actions">
+                          {p.status === "pending" && (
+                            <>
+                              <button type="button" className="btn btn-primary btn-sm" onClick={() => reviewPayment(p, "success")}>Approve</button>
+                              <button type="button" className="btn btn-ghost btn-sm" onClick={() => reviewPayment(p, "failed")}>Reject</button>
+                            </>
+                          )}
                           <button type="button" className="btn btn-ghost btn-sm btn-icon" onClick={() => setDeleteTarget(p)} aria-label="Delete"><LuTrash2 size={15} /></button>
                         </div>
                       </td>

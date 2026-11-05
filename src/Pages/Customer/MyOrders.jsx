@@ -9,6 +9,7 @@ import ConfirmDialog from "../../Components/UI/ConfirmDialog";
 import StatusBadge from "../../Components/UI/StatusBadge";
 import Loader from "../../Components/UI/Loader";
 import EmptyState from "../../Components/UI/EmptyState";
+import { CUSTOMER_SERVICE_CATALOG } from "../../data/customerServices";
 import "../../Styles/CustomerPortal.css";
 
 const STATUS_STEPS = ["pending", "processing", "completed"];
@@ -20,15 +21,20 @@ function MyOrders() {
 
   const [orders, setOrders] = useState([]);
   const [servicesList, setServicesList] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
+  const [servicesError, setServicesError] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ serviceId: "", notes: "" });
+  const [form, setForm] = useState({ serviceId: "", requestedService: "", notes: "" });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelling, setCancelling] = useState(false);
 
   const currency = (n) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n || 0);
+  const serviceChoices = [...new Set([...CUSTOMER_SERVICE_CATALOG.map((service) => service.name), ...servicesList.map((service) => service.name)])];
+  const requestedServiceIsKnown = serviceChoices.some((name) => name.toLowerCase() === form.requestedService.trim().toLowerCase());
+  const requestedServiceIsOrderable = servicesList.some((service) => service.name.toLowerCase() === form.requestedService.trim().toLowerCase());
 
   const loadOrders = async () => {
     setLoading(true);
@@ -43,41 +49,77 @@ function MyOrders() {
 
   useEffect(() => {
     if (!user) return;
+    let mounted = true;
     loadOrders();
-    supabase.from("services").select("id, name, price").eq("status", "active").order("name").then(({ data }) => setServicesList(data || []));
+    const loadServices = async () => {
+      setServicesLoading(true);
+      const { data, error } = await supabase
+        .from("services")
+        .select("id, name, price")
+        .eq("status", "active")
+        .order("name");
+      if (!mounted) return;
+      setServicesList(data || []);
+      setServicesError(error?.message || "");
+      setServicesLoading(false);
+    };
+    loadServices();
+    return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
-    const preselect = searchParams.get("serviceId");
-    if (preselect) {
-      setForm({ serviceId: preselect, notes: "" });
+    const preselectId = searchParams.get("serviceId");
+    const preselectName = searchParams.get("service");
+    if (preselectId || preselectName) {
+      const match = servicesList.find((service) => service.id === preselectId)
+        || servicesList.find((service) => service.name.toLowerCase() === (preselectName || "").toLowerCase());
+      setForm((current) => ({
+        ...current,
+        serviceId: match?.id || preselectId || "",
+        requestedService: match?.name || preselectName || current.requestedService,
+      }));
       setModalOpen(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, servicesList]);
 
   const closeModal = () => {
     setModalOpen(false);
     setFormError("");
+    setForm({ serviceId: "", requestedService: "", notes: "" });
     searchParams.delete("serviceId");
+    searchParams.delete("service");
     setSearchParams(searchParams, { replace: true });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.serviceId) {
-      setFormError("Please select a service.");
+    if (!form.requestedService.trim()) {
+      setFormError("Type or select the service you need.");
       return;
     }
-    const service = servicesList.find((s) => s.id === form.serviceId);
+    const service = servicesList.find((s) => s.id === form.serviceId)
+      || servicesList.find((s) => s.name.toLowerCase() === form.requestedService.trim().toLowerCase());
     setSaving(true);
     setFormError("");
+
+    if (!service) {
+      const body = `Custom service request: ${form.requestedService.trim()}${form.notes.trim() ? `\n\nDetails: ${form.notes.trim()}` : ""}`;
+      const { error } = await supabase.from("messages").insert({ customer_id: user.id, sender_id: user.id, body });
+      setSaving(false);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+      showToast("Service request sent to our team. You can follow up in Messages.");
+      closeModal();
+      return;
+    }
 
     const { error } = await supabase.from("orders").insert({
       service_id: form.serviceId,
       placed_by: user.id,
-      amount: service?.price || 0,
+      amount: service.price,
       notes: form.notes || null,
       order_status: "pending",
       payment_status: "unpaid",
@@ -91,13 +133,6 @@ function MyOrders() {
       return;
     }
 
-    const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a) => ({ recipient_id: a.id, title: "New order placed", message: `${service?.name || "A service"} was just ordered.` }))
-      );
-    }
-
     showToast("Order placed! We'll get started soon.");
     closeModal();
     loadOrders();
@@ -105,7 +140,7 @@ function MyOrders() {
 
   const handleCancel = async () => {
     setCancelling(true);
-    const { error } = await supabase.from("orders").update({ order_status: "cancelled" }).eq("id", cancelTarget.id);
+    const { error } = await supabase.rpc("cancel_customer_order", { p_order_id: cancelTarget.id });
     setCancelling(false);
     if (error) {
       showToast(error.message, "error");
@@ -173,12 +208,37 @@ function MyOrders() {
             {formError && <div className="form-error-banner">{formError}</div>}
             <div className="form-field full">
               <label>Service</label>
-              <select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value })} required>
-                <option value="">Select a service</option>
-                {servicesList.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name} — {currency(s.price)}</option>
-                ))}
-              </select>
+              <input
+                type="text"
+                list="customer-service-options"
+                value={form.requestedService}
+                onChange={(e) => {
+                  const requestedService = e.target.value;
+                  const match = servicesList.find((s) => s.name.toLowerCase() === requestedService.trim().toLowerCase());
+                  setForm({ ...form, requestedService, serviceId: match?.id || "" });
+                }}
+                placeholder={servicesLoading ? "Loading services..." : "Search or type a service"}
+                autoComplete="off"
+                required
+              />
+              <datalist id="customer-service-options">
+                {serviceChoices.map((name) => {
+                  const savedService = servicesList.find((service) => service.name.toLowerCase() === name.toLowerCase());
+                  return <option key={name} value={name} label={savedService ? currency(savedService.price) : "Request from our team"} />;
+                })}
+              </datalist>
+              {form.requestedService.trim() && !requestedServiceIsOrderable && (
+                <small className="service-request-hint">
+                  {requestedServiceIsKnown
+                    ? "This service is listed and can be requested; direct ordering has not been set up yet."
+                    : "Service not available in the list. You can still send it as a request to our team."}
+                </small>
+              )}
+              {servicesError && (
+                <div className="form-error-banner" role="alert">
+                  Could not load services: {servicesError}
+                </div>
+              )}
             </div>
             <div className="form-field full">
               <label>Notes (optional)</label>
@@ -186,7 +246,7 @@ function MyOrders() {
             </div>
             <div className="form-actions">
               <button type="button" className="btn btn-ghost" onClick={closeModal}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Placing…" : "Place Order"}</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Sending…" : requestedServiceIsOrderable ? "Place Order" : "Send Service Request"}</button>
             </div>
           </form>
         </Modal>

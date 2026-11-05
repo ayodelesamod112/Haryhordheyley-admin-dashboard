@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import { useAuth } from "../Context/AuthContext";
 import AuthSidePanel from "../Components/AuthSidePanel";
-import Avatar from "../assets/Avatar.png";
+import Avatar from "../assets/Avatar.jpg";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -42,9 +42,9 @@ function Login() {
         <div className="auth-form-panel">
           <img src={Avatar} alt="HARYHORDHEYLEY" className="auth-logo" />
           <form onSubmit={handleLogin}>
-            <span className="eyebrow">Admin access</span>
+            <span className="eyebrow">Account access</span>
             <h2>Welcome back</h2>
-            <p className="auth-subtitle">Log in to manage HARYHORDHEYLEY Smart Tech Digital Service.</p>
+            <p className="auth-subtitle">Log in to your HARYHORDHEYLEY Smart Tech Digital Services account.</p>
 
             {error && <p className="auth-error">{error}</p>}
 

@@ -1,9 +1,19 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.jpg";
 import "../Styles/Login.css";
 
 function PendingApproval() {
   const { profile, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await signOut();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="auth-container">
@@ -17,8 +27,8 @@ function PendingApproval() {
             approved by an admin yet. Once approved, you'll be able to log in and access the
             dashboard.
           </p>
-          <button type="button" className="btn btn-ghost auth-submit" onClick={signOut}>
-            Log out
+          <button type="button" className="btn btn-ghost auth-submit" onClick={handleLogout} disabled={loggingOut}>
+            {loggingOut ? "Logging out…" : "Log out"}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../supabase/supabaseClient";
 
 const PAGE_SIZE = 8;
+const EMPTY_SEARCH_COLUMNS = [];
 
 /**
  * Generic list + CRUD hook for a single Supabase table.
@@ -10,7 +11,7 @@ const PAGE_SIZE = 8;
  * @param {string[]} searchColumns - text columns to match against `search` (ILIKE, OR'd together)
  * @param {string} selectQuery - the select() string (supports relational embeds, e.g. "*, customers(name)")
  */
-export function useCrudTable(table, { searchColumns = [], selectQuery = "*" } = {}) {
+export function useCrudTable(table, { searchColumns = EMPTY_SEARCH_COLUMNS, selectQuery = "*" } = {}) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,17 +19,19 @@ export function useCrudTable(table, { searchColumns = [], selectQuery = "*" } = 
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({});
+  const searchColumnsKey = searchColumns.join("|");
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const fetchRows = useCallback(async () => {
+    const columns = searchColumnsKey ? searchColumnsKey.split("|") : EMPTY_SEARCH_COLUMNS;
     setLoading(true);
     setError("");
 
     let query = supabase.from(table).select(selectQuery, { count: "exact" });
 
-    if (search.trim() && searchColumns.length > 0) {
-      const orClause = searchColumns.map((col) => `${col}.ilike.%${search.trim()}%`).join(",");
+    if (search.trim() && columns.length > 0) {
+      const orClause = columns.map((col) => `${col}.ilike.%${search.trim()}%`).join(",");
       query = query.or(orClause);
     }
 
@@ -52,17 +55,17 @@ export function useCrudTable(table, { searchColumns = [], selectQuery = "*" } = 
       setTotalCount(count || 0);
     }
     setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table, selectQuery, search, JSON.stringify(filters), page]);
+  }, [table, selectQuery, searchColumnsKey, search, filters, page]);
 
   useEffect(() => {
     fetchRows();
   }, [fetchRows]);
 
   // Reset to page 1 whenever the search or filters change
+  const filtersKey = JSON.stringify(filters);
   useEffect(() => {
     setPage(1);
-  }, [search, JSON.stringify(filters)]);
+  }, [search, filtersKey]);
 
   const createRow = async (payload) => {
     const { data, error: insertError } = await supabase.from(table).insert(payload).select().single();

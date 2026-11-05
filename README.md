@@ -50,22 +50,35 @@ You said you just made a Supabase **account** — here's how to get a project:
    - **Project URL** (looks like `https://xxxxxxxx.supabase.co`)
    - **anon public** key (a long string under "Project API keys")
 
-## 2. Run the database schema
+## 2. Apply the database schema
 
-1. In the Supabase dashboard, open **SQL Editor -> New query**.
-2. Open `supabase_schema.sql` (included in this project) and paste its entire contents in.
-3. Click **Run**. This creates all tables (customers, services, orders, payments, profiles, notifications, business_settings), relationships, Row Level Security policies, and two storage buckets (`avatars`, `business-assets`).
+- **Fresh Supabase project:** run `supabase_schema.sql` in **SQL Editor -> New query**. It creates the tables, secure Row Level Security policies, triggers, and the `avatars`, `business-assets`, and private `payment-proofs` storage buckets.
+- **Existing project:** run `supabase_migrations/20261102_security_customer_portal.sql` once. It adds the fields and policies required by the current app. Do not reset or drop your tables.
 
-If you ever need to reset, you can drop the tables and re-run the script (it uses `create table if not exists` and `on conflict do nothing`, so it's mostly safe to re-run).
+The migration deliberately leaves current account roles unchanged. The older signup flow could create admin accounts, so inspect the existing admin list before reopening public signup. Downgrade any account you do not recognize.
 
-## 3. Configure email settings (recommended)
+## 3. Create the first administrator
+
+Public signup now creates a customer account in `pending` status. It can never create an administrator. Create your own account at `/signup`, then promote that exact account in the Supabase SQL Editor:
+
+```sql
+update public.profiles
+set role = 'admin', status = 'active'
+where id = (
+  select id from auth.users where email = 'YOUR_ADMIN_EMAIL'
+);
+```
+
+Replace `YOUR_ADMIN_EMAIL` with the email address of the account you own. Use the Users page to approve other customers or grant staff roles.
+
+## 4. Configure email settings (recommended)
 
 By default, Supabase requires email confirmation for new signups. For an internal admin tool this is often more friction than it's worth:
 
 - Go to **Authentication -> Providers -> Email** and toggle **Confirm email** off if you want new admins to log in immediately after signing up. Leave it on if you'd rather verify every admin's email first.
 - Go to **Authentication -> URL Configuration** and set **Site URL** to your deployed URL (or `http://localhost:5173` while developing) — this is used in password reset emails.
 
-## 4. Connect the app to your project
+## 5. Connect the app to your project
 
 1. In the project folder, copy `.env.example` to `.env`:
    ```bash
@@ -78,16 +91,16 @@ By default, Supabase requires email confirmation for new signups. For an interna
    ```
 3. Never commit `.env` — it's already in `.gitignore`.
 
-## 5. Install and run
+## 6. Install and run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Visit the local URL Vite prints (usually `http://localhost:5173`). Go to `/signup` to create your first admin account, then log in.
+Visit the local URL Vite prints (usually `http://localhost:5173`). Sign up as a customer, then approve your own account as the first admin using the SQL Editor instructions above.
 
-## 6. Build for production
+## 7. Build for production
 
 ```bash
 npm run build
@@ -108,7 +121,7 @@ Your original project had good folder structure and routing scaffolding, but alm
 - `ProtectedRoute` and `PublicOnlyRoute` guards based on real session state
 
 **Database**
-- `supabase_schema.sql`: `profiles`, `customers`, `services`, `orders`, `payments`, `notifications`, `business_settings` tables with foreign keys, RLS policies, and two storage buckets for avatars/logos
+- `supabase_schema.sql`: `profiles`, `customers`, `services`, `orders`, `payments`, `messages`, `notifications`, `business_settings` tables with foreign keys, role-based RLS policies, and private payment-proof storage
 
 **Pages built from scratch**
 - Dashboard — live stat cards (customers, services, orders, revenue, pending/completed), recent orders table, quick actions
@@ -150,5 +163,5 @@ Already declared in `package.json` — just run `npm install`:
 
 ## Notes
 
-- New admin users are created via the **Sign Up** page — Supabase doesn't allow creating auth users from the browser with elevated privileges, so the Users page manages *role and status* for existing accounts rather than creating brand-new logins.
+- The **Sign Up** page creates pending customer accounts only. Promote the first trusted administrator through the Supabase SQL Editor; later role changes are handled in the admin Users page.
 - Currency formatting defaults to NGN. Change the `currency()` helper inside `Dashboard.jsx`, `Reports.jsx`, `Services.jsx`, `Orders.jsx`, and `Payments.jsx` if you'd prefer a different currency.
