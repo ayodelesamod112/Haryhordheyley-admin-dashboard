@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LuLayoutDashboard, LuWrench, LuShoppingBag, LuCreditCard, LuReceipt,
   LuMessageSquare, LuBell, LuUserRound, LuInfo, LuPhone, LuCircleHelp,
   LuLogOut, LuMenu, LuX, LuChevronDown, LuSun, LuMoon, LuSettings, LuSearch,
+=======
+import { useCallback, useEffect, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+  LuLayoutDashboard, LuHouse, LuWrench, LuShoppingBag, LuCreditCard, LuReceipt,
+  LuMessageSquare, LuBell, LuUserRound, LuInfo, LuPhone, LuCircleHelp,
+  LuLogOut, LuMenu, LuX, LuChevronDown, LuSun, LuMoon,
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
 } from "react-icons/lu";
 import { useAuth } from "../Context/AuthContext";
 import { useToast } from "../Context/ToastContext";
@@ -12,7 +21,10 @@ import { useInactivityLogout } from "../hooks/useInactivityLogout";
 import { supabase } from "../supabase/supabaseClient";
 import ConfirmDialog from "../Components/UI/ConfirmDialog";
 import Avatar from "../assets/Avatar.jpg";
+<<<<<<< HEAD
 import { CUSTOMER_SERVICE_CATALOG } from "../data/customerServices";
+=======
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
 import "../Styles/CustomerPortal.css";
 
 const NAV_ITEMS = [
@@ -23,31 +35,50 @@ const NAV_ITEMS = [
   { to: "/portal/receipts", label: "My Receipts", icon: LuReceipt },
   { to: "/portal/messages", label: "Messages", icon: LuMessageSquare, showBadge: "messages" },
   { to: "/portal/notifications", label: "Notifications", icon: LuBell, showBadge: "notifications" },
+<<<<<<< HEAD
 ];
 
 const INFO_ITEMS = [
+=======
+  { to: "/portal/profile", label: "My Profile", icon: LuUserRound },
+];
+
+const INFO_ITEMS = [
+  { to: "/portal/home", label: "Company Home", icon: LuHouse },
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   { to: "/portal/about", label: "About Us", icon: LuInfo },
   { to: "/portal/contact", label: "Contact Us", icon: LuPhone },
   { to: "/portal/faq", label: "FAQ", icon: LuCircleHelp },
 ];
 
 function CustomerLayout() {
+<<<<<<< HEAD
   const { user, signOut } = useAuth();
+=======
+  const { profile, user, signOut } = useAuth();
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   const { showToast } = useToast();
   const { theme, toggleTheme } = useCustomerTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [companyOpen, setCompanyOpen] = useState(false);
+<<<<<<< HEAD
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [serviceSearch, setServiceSearch] = useState("");
   const [serviceSearchOpen, setServiceSearchOpen] = useState(false);
   const [activeServices, setActiveServices] = useState([]);
+=======
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
+<<<<<<< HEAD
+=======
+  const displayName = profile?.full_name || user?.email || "there";
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   const isCompanyRoute = INFO_ITEMS.some((item) => item.to === location.pathname);
   const companyExpanded = companyOpen || isCompanyRoute;
 
@@ -60,6 +91,7 @@ function CustomerLayout() {
   useInactivityLogout(handleInactivityTimeout, 15 * 60 * 1000, Boolean(user?.id));
 
   useEffect(() => {
+<<<<<<< HEAD
     let mounted = true;
     supabase.from("services").select("id, name, price").eq("status", "active").order("name")
       .then(({ data }) => { if (mounted) setActiveServices(data || []); });
@@ -79,6 +111,8 @@ function CustomerLayout() {
   }, [serviceSearch, serviceSearchOptions]);
 
   useEffect(() => {
+=======
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
     if (!user) return;
 
     const loadCounts = async () => {
@@ -110,6 +144,7 @@ function CustomerLayout() {
     navigate("/login");
   };
 
+<<<<<<< HEAD
   const openSettings = () => {
     setSettingsOpen(true);
     if (window.matchMedia("(max-width: 900px)").matches) setMobileOpen(true);
@@ -128,6 +163,8 @@ function CustomerLayout() {
     requestSearchedService(serviceSearch);
   };
 
+=======
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   const badgeCount = (key) => {
     if (key === "messages") return unreadMessages;
     if (key === "notifications") return unreadNotifications;
@@ -191,6 +228,7 @@ function CustomerLayout() {
         </div>
 
         <div className="portal-sidebar-bottom">
+<<<<<<< HEAD
           <button type="button" className="portal-settings-toggle" onClick={() => setSettingsOpen((open) => !open)} aria-expanded={settingsOpen}>
             <LuSettings size={18} /><span>Settings</span><LuChevronDown className={settingsOpen ? "is-open" : ""} size={15} />
           </button>
@@ -205,6 +243,29 @@ function CustomerLayout() {
               </button>
             </>
           )}
+=======
+          <button
+            type="button"
+            className="portal-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} customer theme`}
+            aria-pressed={theme === "dark"}
+          >
+            {theme === "light" ? <LuMoon size={17} /> : <LuSun size={17} />}
+            <span>Switch to {theme === "light" ? "dark" : "light"} mode</span>
+          </button>
+          <div className="portal-profile-card">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt={displayName} className="portal-avatar-img" />
+            ) : (
+              <div className="portal-avatar-fallback">{displayName.charAt(0).toUpperCase()}</div>
+            )}
+            <div className="portal-user-info">
+              <p className="portal-user-name">{displayName}</p>
+              <p className="portal-user-role">Customer</p>
+            </div>
+          </div>
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
           <button type="button" className="portal-logout-btn" onClick={() => setConfirmingLogout(true)}>
             <LuLogOut size={16} /> <span>Logout</span>
           </button>
@@ -216,6 +277,7 @@ function CustomerLayout() {
           <button type="button" className="portal-menu-toggle" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <LuMenu size={20} />
           </button>
+<<<<<<< HEAD
           <div className="portal-global-search-wrap">
             <form className="portal-global-search" onSubmit={handleServiceSearch} role="search">
               <LuSearch size={18} aria-hidden="true" />
@@ -265,6 +327,9 @@ function CustomerLayout() {
           <button type="button" className="portal-topbar-settings" onClick={openSettings} aria-label="Open customer settings" title="Settings">
             <LuSettings size={19} />
           </button>
+=======
+          <span className="portal-topbar-title">Customer Portal</span>
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
         </header>
 
         <main className="portal-content">

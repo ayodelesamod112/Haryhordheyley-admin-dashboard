@@ -26,7 +26,11 @@ function ForgotPassword() {
 
   return (
     <div className="auth-container">
+<<<<<<< HEAD
       <div className="auth-card auth-card-compact">
+=======
+      <div className="auth-card">
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
         <img src={Avatar} alt="HARYHORDHEYLEY" className="auth-logo" />
         {sent ? (
           <div>

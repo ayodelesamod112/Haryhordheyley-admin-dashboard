@@ -9,7 +9,10 @@ import ConfirmDialog from "../../Components/UI/ConfirmDialog";
 import StatusBadge from "../../Components/UI/StatusBadge";
 import Loader from "../../Components/UI/Loader";
 import EmptyState from "../../Components/UI/EmptyState";
+<<<<<<< HEAD
 import { CUSTOMER_SERVICE_CATALOG } from "../../data/customerServices";
+=======
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
 import "../../Styles/CustomerPortal.css";
 
 const STATUS_STEPS = ["pending", "processing", "completed"];
@@ -25,16 +28,23 @@ function MyOrders() {
   const [servicesError, setServicesError] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+<<<<<<< HEAD
   const [form, setForm] = useState({ serviceId: "", requestedService: "", notes: "" });
+=======
+  const [form, setForm] = useState({ serviceId: "", notes: "" });
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelling, setCancelling] = useState(false);
 
   const currency = (n) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n || 0);
+<<<<<<< HEAD
   const serviceChoices = [...new Set([...CUSTOMER_SERVICE_CATALOG.map((service) => service.name), ...servicesList.map((service) => service.name)])];
   const requestedServiceIsKnown = serviceChoices.some((name) => name.toLowerCase() === form.requestedService.trim().toLowerCase());
   const requestedServiceIsOrderable = servicesList.some((service) => service.name.toLowerCase() === form.requestedService.trim().toLowerCase());
+=======
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
 
   const loadOrders = async () => {
     setLoading(true);
@@ -69,6 +79,7 @@ function MyOrders() {
   }, [user]);
 
   useEffect(() => {
+<<<<<<< HEAD
     const preselectId = searchParams.get("serviceId");
     const preselectName = searchParams.get("service");
     if (preselectId || preselectName) {
@@ -82,18 +93,31 @@ function MyOrders() {
       setModalOpen(true);
     }
   }, [searchParams, servicesList]);
+=======
+    const preselect = searchParams.get("serviceId");
+    if (preselect) {
+      setForm({ serviceId: preselect, notes: "" });
+      setModalOpen(true);
+    }
+  }, [searchParams]);
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
 
   const closeModal = () => {
     setModalOpen(false);
     setFormError("");
+<<<<<<< HEAD
     setForm({ serviceId: "", requestedService: "", notes: "" });
     searchParams.delete("serviceId");
     searchParams.delete("service");
+=======
+    searchParams.delete("serviceId");
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
     setSearchParams(searchParams, { replace: true });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+<<<<<<< HEAD
     if (!form.requestedService.trim()) {
       setFormError("Type or select the service you need.");
       return;
@@ -116,6 +140,20 @@ function MyOrders() {
       return;
     }
 
+=======
+    if (!form.serviceId) {
+      setFormError("Please select a service.");
+      return;
+    }
+    const service = servicesList.find((s) => s.id === form.serviceId);
+    if (!service) {
+      setFormError("That service is no longer available. Reload the service list and try again.");
+      return;
+    }
+    setSaving(true);
+    setFormError("");
+
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
     const { error } = await supabase.from("orders").insert({
       service_id: form.serviceId,
       placed_by: user.id,
@@ -208,6 +246,7 @@ function MyOrders() {
             {formError && <div className="form-error-banner">{formError}</div>}
             <div className="form-field full">
               <label>Service</label>
+<<<<<<< HEAD
               <input
                 type="text"
                 list="customer-service-options"
@@ -234,6 +273,16 @@ function MyOrders() {
                     : "Service not available in the list. You can still send it as a request to our team."}
                 </small>
               )}
+=======
+              <select value={form.serviceId} onChange={(e) => setForm({ ...form, serviceId: e.target.value })} required>
+                <option value="">
+                  {servicesLoading ? "Loading services..." : servicesList.length ? "Select a service" : "No active services available"}
+                </option>
+                {servicesList.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name} — {currency(s.price)}</option>
+                ))}
+              </select>
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
               {servicesError && (
                 <div className="form-error-banner" role="alert">
                   Could not load services: {servicesError}
@@ -246,7 +295,11 @@ function MyOrders() {
             </div>
             <div className="form-actions">
               <button type="button" className="btn btn-ghost" onClick={closeModal}>Cancel</button>
+<<<<<<< HEAD
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Sending…" : requestedServiceIsOrderable ? "Place Order" : "Send Service Request"}</button>
+=======
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Placing…" : "Place Order"}</button>
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
             </div>
           </form>
         </Modal>

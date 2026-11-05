@@ -175,6 +175,7 @@
 // export default Services;
 
 import { useEffect, useMemo, useState } from "react";
+<<<<<<< HEAD
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   LuWrench, LuSmartphone, LuLaptop, LuWifi, LuShieldCheck, LuSparkles,
@@ -183,6 +184,15 @@ import {
 import { supabase } from "../../supabase/supabaseClient";
 import Loader from "../../Components/UI/Loader";
 import { CUSTOMER_SERVICE_CATALOG } from "../../data/customerServices";
+=======
+import { useNavigate } from "react-router-dom";
+import {
+  LuWrench, LuSmartphone, LuLaptop, LuWifi, LuShieldCheck, LuSparkles,
+  LuArrowRight, LuPhone, LuChevronDown,
+} from "react-icons/lu";
+import { supabase } from "../../supabase/supabaseClient";
+import Loader from "../../Components/UI/Loader";
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
 import "../../Styles/CustomerPortal.css";
 
 const ICON_RULES = [
@@ -214,6 +224,7 @@ const FAQS = [
 
 function Services() {
   const navigate = useNavigate();
+<<<<<<< HEAD
   const [searchParams] = useSearchParams();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -237,6 +248,14 @@ function Services() {
     setSearch(searchParams.get("search") || "");
   }, [searchParams]);
 
+=======
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [openFaq, setOpenFaq] = useState(null);
+
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase.from("services").select("*").eq("status", "active").order("created_at", { ascending: false });
@@ -246,9 +265,15 @@ function Services() {
     load();
   }, []);
 
+<<<<<<< HEAD
   const categories = useMemo(() => Array.from(new Set(displayedServices.map((s) => s.category).filter(Boolean))), [displayedServices]);
 
   const filtered = displayedServices.filter((s) => {
+=======
+  const categories = useMemo(() => Array.from(new Set(services.map((s) => s.category).filter(Boolean))), [services]);
+
+  const filtered = services.filter((s) => {
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
     const matchesSearch = !search.trim() || s.name.toLowerCase().includes(search.trim().toLowerCase());
     const matchesCategory = !category || s.category === category;
     return matchesSearch && matchesCategory;
@@ -262,7 +287,11 @@ function Services() {
   }, {});
 
   const handleOrderNow = (service) => {
+<<<<<<< HEAD
     navigate(`/portal/orders?service=${encodeURIComponent(service.name)}`);
+=======
+    navigate(`/portal/orders?serviceId=${service.id}`);
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
   };
 
   return (
@@ -278,7 +307,11 @@ function Services() {
       <div className="portal-page" style={{ paddingTop: 30 }}>
         <div className="services-toolbar">
           <div className="toolbar-search" style={{ maxWidth: 280 }}>
+<<<<<<< HEAD
             <LuSearch size={16} aria-hidden="true" />
+=======
+            {/* <LuSearch size={} /> */}
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
             <input type="search" placeholder="Search services…" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -308,8 +341,12 @@ function Services() {
                     <h3>{s.name}</h3>
                     {s.description && <p className="service-tile-desc">{s.description}</p>}
                     <div className="service-tile-footer">
+<<<<<<< HEAD
                       <span className="service-tile-price">{s.requestOnly ? "Quote on request" : ""}</span>
                       <button type="button" className="btn btn-primary btn-sm" onClick={() => handleOrderNow(s)}>{s.requestOnly ? "Request Service" : "Order Now"}</button>
+=======
+                      <button type="button" className="btn btn-primary btn-sm" onClick={() => handleOrderNow(s)}>Order Now</button>
+>>>>>>> 571250a4e43d62e8244eb0d1cd44791de90c4f3f
                     </div>
                   </div>
                 ))}
